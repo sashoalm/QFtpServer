@@ -22,9 +22,16 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # CONFIG += mobility
 # MOBILITY +=
 
-SOURCES += main.cpp mainwindow.cpp
-HEADERS += mainwindow.h
+SOURCES += main.cpp mainwindow.cpp \
+    ftpserver.cpp \
+    ftpcontrolconnection.cpp \
+    ftppassivedataconnection.cpp
+HEADERS += mainwindow.h \
+    ftpserver.h \
+    ftpcontrolconnection.h \
+    ftppassivedataconnection.h
 FORMS += mainwindow.ui
+QT += network
 
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
