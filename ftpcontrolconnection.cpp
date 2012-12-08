@@ -1,7 +1,11 @@
 #include "ftpcontrolconnection.h"
 #include "ftppassivedataconnection.h"
+#include <QtCore/QFileInfo>
+#include <QtCore/QDateTime>
+#include <QtCore/QDir>
 #include <QtCore/QStringList>
 #include <QtCore/QDir>
+#include <QtCore/QEventLoop>
 #include <QtNetwork/QTcpSocket>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket) :
@@ -92,8 +96,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     else if ("PASV" == command)
         pasv();
     else if ("LIST" == command) {
-        if (dataConnection)
-            dataConnection->list(currentDirectory);
+        list(currentDirectory);
     }
     else
         reply(500);
@@ -106,4 +109,55 @@ void FtpControlConnection::pasv()
     connect(dataConnection.data(), SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
     int port = dataConnection->serverPort();
     reply(227, QString("comment 127,0,0,1,%1,%2").arg(port/256).arg(port%256));
+}
+
+void FtpControlConnection::list(const QString &dir)
+{
+    if (!dataConnection) {
+        reply(425);
+        return;
+    }
+
+    if (!dataConnection->isConnected()) {
+        QEventLoop loop;
+        connect(dataConnection.data(), SIGNAL(connected()), &loop, SLOT(quit()));
+        disconnect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
+        loop.exec();
+        connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
+    }
+
+    reply(150);
+
+    // this is how the returned list looks
+    // it is like what is returned by 'ls -l'
+    // drwxr-xr-x    9 ftp      ftp          4096 Nov 17  2009 pub
+
+    QString line;
+    foreach (QFileInfo fi, QDir(dir).entryInfoList()) {
+        if (fi.isSymLink()) line += 'l';
+        else if (fi.isDir()) line += 'd';
+        else line += '-';
+        QFile::Permissions p = fi.permissions();
+        line += (p & QFile::ReadOwner) ? 'r' : '-';
+        line += (p & QFile::WriteOwner) ? 'w' : '-';
+        line += (p & QFile::ExeOwner) ? 'x' : '-';
+        line += (p & QFile::ReadGroup) ? 'r' : '-';
+        line += (p & QFile::WriteGroup) ? 'w' : '-';
+        line += (p & QFile::ExeGroup) ? 'x' : '-';
+        line += (p & QFile::ReadOther) ? 'r' : '-';
+        line += (p & QFile::WriteOther) ? 'w' : '-';
+        line += (p & QFile::ExeOther) ? 'x' : '-';
+        // number of hard links, we say 1
+        line += " 1 " + fi.owner() + ' ' + fi.group() + ' ' + QString::number(fi.size()) + ' ';
+        QDateTime lm = fi.lastModified();
+        line += lm.date().toString("MMM d") + ' ' + lm.time().toString("hh:mm") + ' ';
+        line += fi.fileName();
+        line += "\r\n";
+    }
+
+    dataConnection->socket()->write(line.toUtf8());
+    dataConnection->socket()->disconnectFromHost();
+    dataConnection = 0;
+
+    reply(226);
 }
