@@ -25,6 +25,7 @@ private:
     void pasv();
     QTcpSocket *socket;
     QString buffer;
+    QString currentDirectory;
     QPointer<FtpPassiveDataConnection> dataConnection;
 };
 

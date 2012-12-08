@@ -1,7 +1,8 @@
 #include "ftpcontrolconnection.h"
 #include "ftppassivedataconnection.h"
-#include <QtNetwork/QTcpSocket>
 #include <QtCore/QStringList>
+#include <QtCore/QDir>
+#include <QtNetwork/QTcpSocket>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket) :
     QObject(parent)
@@ -10,6 +11,7 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket) 
     socket->setParent(this);
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
+    currentDirectory = "/";
     reply(220);
 }
 
@@ -69,14 +71,29 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     else if ("PASS" == command)
         reply(230);
     else if ("PWD" == command)
-        reply(227, "/");
+        reply(227, '"' + currentDirectory + '"');
+    else if ("CWD" == command) {
+        if (commandParameters.isEmpty()) {
+            reply(550);
+            return;
+        }
+        if ('/' != commandParameters[0]) {
+            commandParameters = QDir::cleanPath(currentDirectory + '/' + commandParameters);
+        }
+        if (!QDir().exists(commandParameters)) {
+            reply(550);
+            return;
+        }
+        currentDirectory = commandParameters;
+        reply(250);
+    }
     else if ("TYPE" == command)
         reply(200);
     else if ("PASV" == command)
         pasv();
     else if ("LIST" == command) {
         if (dataConnection)
-            dataConnection->list("/");
+            dataConnection->list(currentDirectory);
     }
     else
         reply(500);
