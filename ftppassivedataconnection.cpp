@@ -55,7 +55,7 @@ void FtpPassiveDataConnection::list(const QString &dir)
         QDateTime lm = fi.lastModified();
         line += lm.date().toString("MMM d") + ' ' + lm.time().toString("hh:mm") + ' ';
         line += fi.fileName();
-        line += '\n';
+        line += "\r\n";
     }
 
     socket->write(line.toUtf8());

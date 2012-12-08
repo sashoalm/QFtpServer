@@ -23,8 +23,8 @@ void FtpControlConnection::acceptNewData()
     buffer += QString::fromUtf8(socket->readAll());
 
     // get the list of complete commands
-    bool hasCompleteLine = buffer.endsWith('\n');
-    QStringList list = buffer.split('\n', QString::SkipEmptyParts);
+    bool hasCompleteLine = buffer.endsWith("\r\n");
+    QStringList list = buffer.split("\r\n", QString::SkipEmptyParts);
     if (!hasCompleteLine) {
         buffer = list.last();
         list.removeLast();
@@ -43,9 +43,9 @@ void FtpControlConnection::reply(int code, const QString &details)
     qDebug() << "FtpControlConnection::reply" << code << details;
 
     if (details.isEmpty())
-        socket->write(QString("%1 comment\n").arg(code).toUtf8());
+        socket->write(QString("%1 comment\r\n").arg(code).toUtf8());
     else
-        socket->write(QString("%1 %2\n").arg(code).arg(details).toUtf8());
+        socket->write(QString("%1 %2\r\n").arg(code).arg(details).toUtf8());
 }
 
 void FtpControlConnection::processCommand(const QString &entireCommand)

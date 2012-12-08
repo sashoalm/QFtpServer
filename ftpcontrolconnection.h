@@ -25,7 +25,7 @@ private:
     void pasv();
     QTcpSocket *socket;
     QString buffer;
-    QPointer<FtpPassiveDataConnection > dataConnection;
+    QPointer<FtpPassiveDataConnection> dataConnection;
 };
 
 #endif // FTPCONTROLCONNECTION_H
