@@ -39,7 +39,8 @@ void FtpPassiveDataConnection::list(const QString &dir)
     QString line;
     foreach (QFileInfo fi, QDir(dir).entryInfoList()) {
         if (fi.isSymLink()) line += 'l';
-        if (fi.isDir()) line += 'd';
+        else if (fi.isDir()) line += 'd';
+        else line += '-';
         QFile::Permissions p = fi.permissions();
         line += (p & QFile::ReadOwner) ? 'r' : '-';
         line += (p & QFile::WriteOwner) ? 'w' : '-';
