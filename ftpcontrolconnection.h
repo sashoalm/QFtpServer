@@ -24,6 +24,8 @@ private:
     void processCommand(const QString &entireCommand);
     void pasv();
     void list(const QString &dir);
+    void retr(const QString &fileName);
+    void cwd(const QString &dir);
     QTcpSocket *socket;
     QString buffer;
     QString currentDirectory;

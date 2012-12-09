@@ -76,28 +76,16 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         reply(230);
     else if ("PWD" == command)
         reply(227, '"' + currentDirectory + '"');
-    else if ("CWD" == command) {
-        if (commandParameters.isEmpty()) {
-            reply(550);
-            return;
-        }
-        if ('/' != commandParameters[0]) {
-            commandParameters = QDir::cleanPath(currentDirectory + '/' + commandParameters);
-        }
-        if (!QDir().exists(commandParameters)) {
-            reply(550);
-            return;
-        }
-        currentDirectory = commandParameters;
-        reply(250);
-    }
+    else if ("CWD" == command)
+        cwd(commandParameters);
     else if ("TYPE" == command)
         reply(200);
     else if ("PASV" == command)
         pasv();
-    else if ("LIST" == command) {
+    else if ("LIST" == command)
         list(currentDirectory);
-    }
+    else if ("RETR" == command)
+        retr(commandParameters);
     else
         reply(500);
 }
@@ -160,4 +148,67 @@ void FtpControlConnection::list(const QString &dir)
     dataConnection = 0;
 
     reply(226);
+}
+
+void FtpControlConnection::retr(const QString &_fileName)
+{
+    if (!dataConnection) {
+        reply(425);
+        return;
+    }
+    QString fileName = _fileName;
+    if (fileName.isEmpty()) {
+        reply(550);
+        return;
+    }
+    if ('/' != fileName[0])
+        fileName = QDir::cleanPath(currentDirectory + '/' + fileName);
+    QFileInfo fi(fileName);
+    if (!(fi.exists() && fi.isFile())) {
+        reply(550);
+        return;
+    }
+    if (!dataConnection->isConnected()) {
+        QEventLoop loop;
+        connect(dataConnection.data(), SIGNAL(connected()), &loop, SLOT(quit()));
+        disconnect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
+        loop.exec();
+        connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
+    }
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        reply(550);
+        return;
+    }
+    reply(150);
+    QEventLoop loop;
+    connect(dataConnection->socket(), SIGNAL(bytesWritten(qint64)), &loop, SLOT(quit()));
+    forever {
+        QByteArray buffer = file.read(64*1024);
+        if (buffer.isEmpty())
+            break;
+        if (buffer.size() != dataConnection->socket()->write(buffer)) {
+            reply(550);
+            return;
+        }
+        loop.exec();
+    }
+    reply(226);
+}
+
+void FtpControlConnection::cwd(const QString &_dir)
+{
+    QString dir = _dir;
+    if (dir.isEmpty()) {
+        reply(550);
+        return;
+    }
+    if ('/' != dir[0])
+        dir = QDir::cleanPath(currentDirectory + '/' + dir);
+    if (!QDir().exists(dir)) {
+        reply(550);
+        return;
+    }
+    currentDirectory = dir;
+    reply(250);
 }
