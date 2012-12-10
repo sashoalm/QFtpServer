@@ -25,11 +25,13 @@ symbian:TARGET.CAPABILITY += NetworkServices
 SOURCES += main.cpp mainwindow.cpp \
     ftpserver.cpp \
     ftpcontrolconnection.cpp \
-    ftppassivedataconnection.cpp
+    ftppassivedataconnection.cpp \
+    asynchronousretrievecommand.cpp
 HEADERS += mainwindow.h \
     ftpserver.h \
     ftpcontrolconnection.h \
-    ftppassivedataconnection.h
+    ftppassivedataconnection.h \
+    asynchronousretrievecommand.h
 FORMS += mainwindow.ui
 QT += network
 

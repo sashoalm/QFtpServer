@@ -168,32 +168,7 @@ void FtpControlConnection::retr(const QString &_fileName)
         reply(550);
         return;
     }
-    if (!dataConnection->isConnected()) {
-        QEventLoop loop;
-        connect(dataConnection.data(), SIGNAL(connected()), &loop, SLOT(quit()));
-        disconnect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
-        loop.exec();
-        connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
-    }
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly)) {
-        reply(550);
-        return;
-    }
-    reply(150);
-    QEventLoop loop;
-    connect(dataConnection->socket(), SIGNAL(bytesWritten(qint64)), &loop, SLOT(quit()));
-    forever {
-        QByteArray buffer = file.read(64*1024);
-        if (buffer.isEmpty())
-            break;
-        if (buffer.size() != dataConnection->socket()->write(buffer)) {
-            reply(550);
-            return;
-        }
-        loop.exec();
-    }
-    reply(226);
+    dataConnection->retr(fileName);
 }
 
 void FtpControlConnection::cwd(const QString &_dir)

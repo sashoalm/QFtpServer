@@ -1,4 +1,5 @@
 #include "ftppassivedataconnection.h"
+#include "asynchronousretrievecommand.h"
 
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpServer>
@@ -23,6 +24,17 @@ bool FtpPassiveDataConnection::isConnected()
     return _socket;
 }
 
+void FtpPassiveDataConnection::retr(const QString &fileName)
+{
+    AsynchronousRetrieveCommand *retr = new AsynchronousRetrieveCommand(this, fileName);
+    connect(retr, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
+    if (_socket)
+        retr->start();
+    else {
+        connect(this, SIGNAL(connected()), retr, SLOT(start()));
+    }
+}
+
 void FtpPassiveDataConnection::acceptNewConnection()
 {
     qDebug() << "FtpPassiveDataConnection::acceptNewConnection";
@@ -32,5 +44,5 @@ void FtpPassiveDataConnection::acceptNewConnection()
     connect(_socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
     delete server;
     server = 0;
-    connected();
+    emit connected();
 }

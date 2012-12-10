@@ -15,10 +15,12 @@ public:
     ~FtpControlConnection();
     
 signals:
-    
+
+public slots:
+    void reply(int code, const QString &details = QString());
+
 private slots:
     void acceptNewData();
-    void reply(int code, const QString &details = QString());
 
 private:
     void processCommand(const QString &entireCommand);

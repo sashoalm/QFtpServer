@@ -14,6 +14,7 @@ public:
     int serverPort();
     bool isConnected();
     QTcpSocket* socket() { return _socket; }
+    void retr(const QString &fileName);
 
 signals:
     void connected();
