@@ -35,6 +35,13 @@ HEADERS += mainwindow.h \
 FORMS += mainwindow.ui
 QT += network
 
+CONFIG(release, debug|release) {
+    #This is a release build
+    DEFINES += QT_NO_DEBUG_OUTPUT
+} else {
+    #This is a debug build
+}
+
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
 qtcAddDeployment()
