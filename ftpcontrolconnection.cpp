@@ -44,6 +44,13 @@ void FtpControlConnection::acceptNewData()
     }
 }
 
+QString FtpControlConnection::toAbsolutePath(const QString &fileName) const
+{
+    if (!fileName.isEmpty() && '/' == fileName[0])
+        return fileName;
+    return QDir::cleanPath(currentDirectory + '/' + fileName);
+}
+
 void FtpControlConnection::reply(int code, const QString &details)
 {
     qDebug() << "FtpControlConnection::reply" << code << details;
@@ -85,7 +92,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     else if ("LIST" == command)
         list(currentDirectory);
     else if ("RETR" == command)
-        retr(commandParameters);
+        retr(toAbsolutePath(commandParameters));
     else
         reply(500);
 }
@@ -150,19 +157,12 @@ void FtpControlConnection::list(const QString &dir)
     reply(226);
 }
 
-void FtpControlConnection::retr(const QString &_fileName)
+void FtpControlConnection::retr(const QString &fileName)
 {
     if (!dataConnection) {
         reply(425);
         return;
     }
-    QString fileName = _fileName;
-    if (fileName.isEmpty()) {
-        reply(550);
-        return;
-    }
-    if ('/' != fileName[0])
-        fileName = QDir::cleanPath(currentDirectory + '/' + fileName);
     QFileInfo fi(fileName);
     if (!(fi.exists() && fi.isFile())) {
         reply(550);
