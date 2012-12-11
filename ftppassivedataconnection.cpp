@@ -1,5 +1,6 @@
 #include "ftppassivedataconnection.h"
 #include "asynchronousretrievecommand.h"
+#include "asynchronousstorecommand.h"
 
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpServer>
@@ -32,6 +33,17 @@ void FtpPassiveDataConnection::retr(const QString &fileName)
         retr->start();
     else {
         connect(this, SIGNAL(connected()), retr, SLOT(start()));
+    }
+}
+
+void FtpPassiveDataConnection::stor(const QString &fileName)
+{
+    AsynchronousStoreCommand *stor = new AsynchronousStoreCommand(this, fileName);
+    connect(stor, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
+    if (_socket)
+        stor->start();
+    else {
+        connect(this, SIGNAL(connected()), stor, SLOT(start()));
     }
 }
 

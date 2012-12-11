@@ -93,6 +93,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         list(currentDirectory);
     else if ("RETR" == command)
         retr(toAbsolutePath(commandParameters));
+    else if ("STOR" == command)
+        stor(toAbsolutePath(commandParameters));
     else
         reply(500);
 }
@@ -169,6 +171,16 @@ void FtpControlConnection::retr(const QString &fileName)
         return;
     }
     dataConnection->retr(fileName);
+}
+
+void FtpControlConnection::stor(const QString &fileName)
+{
+    if (!dataConnection) {
+        reply(425);
+        return;
+    }
+    QFileInfo fi(fileName);
+    dataConnection->stor(fileName);
 }
 
 void FtpControlConnection::cwd(const QString &_dir)

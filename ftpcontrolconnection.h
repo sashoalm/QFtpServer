@@ -28,6 +28,7 @@ private:
     void pasv();
     void list(const QString &dir);
     void retr(const QString &fileName);
+    void stor(const QString &fileName);
     void cwd(const QString &dir);
     QTcpSocket *socket;
     QString buffer;

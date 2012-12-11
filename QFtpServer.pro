@@ -26,12 +26,14 @@ SOURCES += main.cpp mainwindow.cpp \
     ftpserver.cpp \
     ftpcontrolconnection.cpp \
     ftppassivedataconnection.cpp \
-    asynchronousretrievecommand.cpp
+    asynchronousretrievecommand.cpp \
+    asynchronousstorecommand.cpp
 HEADERS += mainwindow.h \
     ftpserver.h \
     ftpcontrolconnection.h \
     ftppassivedataconnection.h \
-    asynchronousretrievecommand.h
+    asynchronousretrievecommand.h \
+    asynchronousstorecommand.h
 FORMS += mainwindow.ui
 QT += network
 
