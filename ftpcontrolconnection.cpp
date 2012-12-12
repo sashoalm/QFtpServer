@@ -16,7 +16,7 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket) 
     socket->setParent(this);
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
-    currentDirectory = "/";
+    currentDirectory = QDir::rootPath();
     reply(220);
 }
 
