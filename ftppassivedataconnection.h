@@ -16,6 +16,7 @@ public:
     QTcpSocket* socket() { return _socket; }
     void retr(const QString &fileName);
     void stor(const QString &fileName);
+    void list(const QString &fileName);
 
 signals:
     void connected();
