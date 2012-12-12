@@ -6,6 +6,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QDir>
 #include <QtCore/QEventLoop>
+#include <QtCore/QDebug>
 #include <QtNetwork/QTcpSocket>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket) :
