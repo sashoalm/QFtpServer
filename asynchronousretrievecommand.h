@@ -20,7 +20,7 @@ public slots:
     void start();
 
 private slots:
-    void sendNextBlock(qint64 bytes=0);
+    void refillSocketBuffer(qint64 bytes=0);
 
 private:
     QTcpSocket* socket();
