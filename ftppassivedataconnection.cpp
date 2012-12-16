@@ -28,34 +28,17 @@ bool FtpPassiveDataConnection::isConnected()
 
 void FtpPassiveDataConnection::retr(const QString &fileName)
 {
-    AsynchronousRetrieveCommand *retr = new AsynchronousRetrieveCommand(this, fileName);
-    connect(retr, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
-    if (_socket)
-        retr->start();
-    else {
-        connect(this, SIGNAL(connected()), retr, SLOT(start()));
-    }
+    startOrScheduleCommand(new AsynchronousRetrieveCommand(this, fileName));
 }
 
 void FtpPassiveDataConnection::stor(const QString &fileName, bool appendMode)
 {
-    AsynchronousStoreCommand *stor = new AsynchronousStoreCommand(this, fileName, appendMode);
-    connect(stor, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
-    if (_socket)
-        stor->start();
-    else {
-        connect(this, SIGNAL(connected()), stor, SLOT(start()));
-    }
+    startOrScheduleCommand(new AsynchronousStoreCommand(this, fileName, appendMode));
 }
 
 void FtpPassiveDataConnection::list(const QString &fileName)
 {
-    AsynchronousListCommand *listCommand = new AsynchronousListCommand(this, fileName);
-    connect(listCommand, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
-    if (_socket)
-        listCommand->start();
-    else
-        connect(this, SIGNAL(connected()), listCommand, SLOT(start()));
+    startOrScheduleCommand(new AsynchronousListCommand(this, fileName));
 }
 
 void FtpPassiveDataConnection::acceptNewConnection()
@@ -68,4 +51,12 @@ void FtpPassiveDataConnection::acceptNewConnection()
     delete server;
     server = 0;
     emit connected();
+}
+
+void FtpPassiveDataConnection::startOrScheduleCommand(QObject *object)
+{
+    connect(object, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
+    connect(this, SIGNAL(connected()), object, SLOT(start()));
+    if (_socket)
+        emit connected();
 }

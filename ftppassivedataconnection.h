@@ -25,6 +25,7 @@ private slots:
     void acceptNewConnection();
 
 private:
+    void startOrScheduleCommand(QObject *object);
     QTcpSocket *_socket;
     QTcpServer *server;
 };
