@@ -105,6 +105,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         mkd(toAbsolutePath(commandParameters));
     else if ("RMD" == command)
         rmd(toAbsolutePath(commandParameters));
+    else if ("DELE" == command)
+        dele(toAbsolutePath(commandParameters));
     else
         reply(500);
 }
@@ -175,6 +177,14 @@ void FtpControlConnection::mkd(const QString &dir)
 void FtpControlConnection::rmd(const QString &dir)
 {
     if (QDir().rmdir(dir))
+        reply(250);
+    else
+        reply(550);
+}
+
+void FtpControlConnection::dele(const QString &fileName)
+{
+    if (QDir().remove(fileName))
         reply(250);
     else
         reply(550);

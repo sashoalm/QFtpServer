@@ -32,6 +32,7 @@ private:
     void cwd(const QString &dir);
     void mkd(const QString &dir);
     void rmd(const QString &dir);
+    void dele(const QString &fileName);
     QTcpSocket *socket;
     QString buffer;
     QString currentDirectory;
