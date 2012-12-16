@@ -46,6 +46,18 @@ void FtpControlConnection::acceptNewData()
     }
 }
 
+void FtpControlConnection::splitCommand(const QString &entireCommand, QString &command, QString &commandParameters)
+{
+    // split parameters and command
+    int pos = entireCommand.indexOf(' ');
+    if (-1 != pos) {
+        command = entireCommand.left(pos).trimmed().toUpper();
+        commandParameters = entireCommand.mid(pos+1).trimmed();
+    } else {
+        command = entireCommand.trimmed().toUpper();
+    }
+}
+
 QString FtpControlConnection::toAbsolutePath(const QString &fileName) const
 {
     if (!QDir::isAbsolutePath(fileName)) {
@@ -73,20 +85,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
 
     QString command;
     QString commandParameters;
-
-    // split parameters and command
-    int pos = entireCommand.indexOf(' ');
-    if (-1 != pos) {
-        command = entireCommand.left(pos).trimmed().toUpper();
-        commandParameters = entireCommand.mid(pos+1).trimmed();
-    } else {
-        command = entireCommand.trimmed().toUpper();
-    }
-
-    // make sure that rnfrStoredFileName is stored only
-    // until the RNTO command
-    if (!rnfrStoredFileName.isEmpty() && "RNTO" != command)
-        rnfrStoredFileName.clear();
+    splitCommand(entireCommand, command, commandParameters);
 
     if ("USER" == command)
         reply(331);
@@ -113,13 +112,15 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     else if ("DELE" == command)
         dele(toAbsolutePath(commandParameters));
     else if ("RNFR" == command)
-        rnfr(toAbsolutePath(commandParameters));
+        reply(350);
     else if ("RNTO" == command)
         rnto(toAbsolutePath(commandParameters));
     else if ("APPE" == command)
         stor(toAbsolutePath(commandParameters), true);
     else
         reply(500);
+
+    lastProcessedCommand = entireCommand;
 }
 
 void FtpControlConnection::pasv()
@@ -201,17 +202,13 @@ void FtpControlConnection::dele(const QString &fileName)
         reply(550);
 }
 
-void FtpControlConnection::rnfr(const QString &fileName)
-{
-    rnfrStoredFileName = fileName;
-    reply(350);
-}
-
 void FtpControlConnection::rnto(const QString &fileName)
 {
-    if (QDir().rename(rnfrStoredFileName, fileName))
+    QString command;
+    QString commandParameters;
+    splitCommand(lastProcessedCommand, command, commandParameters);
+    if ("RNFR" == command && QDir().rename(toAbsolutePath(commandParameters), fileName))
         reply(250);
     else
         reply(550);
-    rnfrStoredFileName.clear();
 }

@@ -23,6 +23,7 @@ private slots:
     void acceptNewData();
 
 private:
+    void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
     QString toAbsolutePath(const QString &fileName) const;
     void processCommand(const QString &entireCommand);
     void pasv();
@@ -33,12 +34,11 @@ private:
     void mkd(const QString &dir);
     void rmd(const QString &dir);
     void dele(const QString &fileName);
-    void rnfr(const QString &fileName);
     void rnto(const QString &fileName);
     QTcpSocket *socket;
     QString buffer;
     QString currentDirectory;
-    QString rnfrStoredFileName;
+    QString lastProcessedCommand;
     QPointer<FtpPassiveDataConnection> dataConnection;
 };
 
