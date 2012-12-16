@@ -37,9 +37,9 @@ void FtpPassiveDataConnection::retr(const QString &fileName)
     }
 }
 
-void FtpPassiveDataConnection::stor(const QString &fileName)
+void FtpPassiveDataConnection::stor(const QString &fileName, bool appendMode)
 {
-    AsynchronousStoreCommand *stor = new AsynchronousStoreCommand(this, fileName);
+    AsynchronousStoreCommand *stor = new AsynchronousStoreCommand(this, fileName, appendMode);
     connect(stor, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
     if (_socket)
         stor->start();

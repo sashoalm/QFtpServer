@@ -3,10 +3,11 @@
 #include <QtCore/QFile>
 #include <QtNetwork/QTcpSocket>
 
-AsynchronousStoreCommand::AsynchronousStoreCommand(QObject *parent, const QString &fileName) :
+AsynchronousStoreCommand::AsynchronousStoreCommand(QObject *parent, const QString &fileName, bool appendMode) :
     QObject(parent)
 {
     this->fileName = fileName;
+    this->appendMode = appendMode;
     file = 0;
 }
 
@@ -19,7 +20,10 @@ void AsynchronousStoreCommand::start()
 {
     emit reply(150);
     file = new QFile(fileName, this);
-    file->open(QIODevice::WriteOnly);
+    if (appendMode)
+        file->open(QIODevice::Append);
+    else
+        file->open(QIODevice::WriteOnly);
     connect(socket(), SIGNAL(readyRead()), this, SLOT(acceptNextBlock()));
 }
 

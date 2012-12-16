@@ -28,7 +28,7 @@ private:
     void pasv();
     void list(const QString &dir);
     void retr(const QString &fileName);
-    void stor(const QString &fileName);
+    void stor(const QString &fileName, bool appendMode = false);
     void cwd(const QString &dir);
     void mkd(const QString &dir);
     void rmd(const QString &dir);

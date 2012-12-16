@@ -10,7 +10,7 @@ class AsynchronousStoreCommand : public QObject
 {
     Q_OBJECT
 public:
-    explicit AsynchronousStoreCommand(QObject *parent, const QString &fileName);
+    explicit AsynchronousStoreCommand(QObject *parent, const QString &fileName, bool appendMode = false);
     ~AsynchronousStoreCommand();
 
 signals:
@@ -26,6 +26,7 @@ private:
     QTcpSocket* socket();
     QString fileName;
     QFile *file;
+    bool appendMode;
 };
 
 #endif // ASYNCHRONOUSSTORECOMMAND_H
