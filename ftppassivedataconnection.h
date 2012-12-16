@@ -14,7 +14,7 @@ public:
     int serverPort();
     bool isConnected();
     QTcpSocket* socket() { return _socket; }
-    void retr(const QString &fileName);
+    void retr(const QString &fileName, qint64 seekTo = 0);
     void stor(const QString &fileName, bool appendMode = false);
     void list(const QString &fileName);
 

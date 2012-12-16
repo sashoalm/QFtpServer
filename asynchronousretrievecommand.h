@@ -10,7 +10,7 @@ class AsynchronousRetrieveCommand : public QObject
 {
     Q_OBJECT
 public:
-    explicit AsynchronousRetrieveCommand(QObject *parent, const QString &fileName);
+    explicit AsynchronousRetrieveCommand(QObject *parent, const QString &fileName, qint64 seekTo = 0);
     ~AsynchronousRetrieveCommand();
 
 signals:
@@ -26,6 +26,7 @@ private:
     QTcpSocket* socket();
     QString fileName;
     QFile *file;
+    qint64 seekTo;
 };
 
 #endif // ASYNCHRONOUSRETRIEVECOMMAND_H

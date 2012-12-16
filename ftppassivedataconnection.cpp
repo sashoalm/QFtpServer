@@ -26,9 +26,9 @@ bool FtpPassiveDataConnection::isConnected()
     return _socket;
 }
 
-void FtpPassiveDataConnection::retr(const QString &fileName)
+void FtpPassiveDataConnection::retr(const QString &fileName, qint64 seekTo)
 {
-    startOrScheduleCommand(new AsynchronousRetrieveCommand(this, fileName));
+    startOrScheduleCommand(new AsynchronousRetrieveCommand(this, fileName, seekTo));
 }
 
 void FtpPassiveDataConnection::stor(const QString &fileName, bool appendMode)

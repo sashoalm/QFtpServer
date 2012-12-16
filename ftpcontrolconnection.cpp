@@ -117,6 +117,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         rnto(toAbsolutePath(commandParameters));
     else if ("APPE" == command)
         stor(toAbsolutePath(commandParameters), true);
+    else if ("REST" == command)
+        reply(350);
     else
         reply(500);
 
@@ -152,7 +154,14 @@ void FtpControlConnection::retr(const QString &fileName)
         reply(550);
         return;
     }
-    dataConnection->retr(fileName);
+
+    qint64 seekTo = 0;
+    QString command;
+    QString commandParameters;
+    splitCommand(lastProcessedCommand, command, commandParameters);
+    if ("REST" == command)
+        QTextStream(commandParameters.toUtf8()) >> seekTo;
+    dataConnection->retr(fileName, seekTo);
 }
 
 void FtpControlConnection::stor(const QString &fileName, bool appendMode)
