@@ -139,7 +139,6 @@ void FtpControlConnection::stor(const QString &fileName)
         reply(425);
         return;
     }
-    QFileInfo fi(fileName);
     dataConnection->stor(fileName);
 }
 
