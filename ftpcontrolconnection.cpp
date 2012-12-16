@@ -8,6 +8,7 @@
 #include <QtCore/QEventLoop>
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QHostAddress>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket) :
     QObject(parent)
@@ -83,7 +84,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     else if ("PASS" == command)
         reply(230);
     else if ("PWD" == command)
-        reply(227, '"' + currentDirectory + '"');
+        reply(227, '"' + QDir::toNativeSeparators(currentDirectory) + '"');
     else if ("CWD" == command)
         cwd(commandParameters);
     else if ("TYPE" == command)
@@ -104,9 +105,8 @@ void FtpControlConnection::pasv()
 {
     delete dataConnection;
     dataConnection = new FtpPassiveDataConnection(this);
-    connect(dataConnection.data(), SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
     int port = dataConnection->serverPort();
-    reply(227, QString("comment 127,0,0,1,%1,%2").arg(port/256).arg(port%256));
+    reply(227, QString("comment %1,%2,%3").arg(socket->localAddress().toString().replace('.',',')).arg(port/256).arg(port%256));
 }
 
 void FtpControlConnection::list(const QString &dir)
@@ -146,12 +146,9 @@ void FtpControlConnection::stor(const QString &fileName)
 void FtpControlConnection::cwd(const QString &_dir)
 {
     QString dir = _dir;
-    if (dir.isEmpty()) {
-        reply(550);
-        return;
-    }
-    if ('/' != dir[0])
-        dir = QDir::cleanPath(currentDirectory + '/' + dir);
+    if (!QDir::isAbsolutePath(dir))
+        dir = currentDirectory + '/' + dir;
+    dir = QDir::cleanPath(QDir(dir).canonicalPath());
     if (!QDir().exists(dir)) {
         reply(550);
         return;
