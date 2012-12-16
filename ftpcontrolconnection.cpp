@@ -48,9 +48,13 @@ void FtpControlConnection::acceptNewData()
 
 QString FtpControlConnection::toAbsolutePath(const QString &fileName) const
 {
-    if (!fileName.isEmpty() && '/' == fileName[0])
-        return fileName;
-    return QDir::cleanPath(currentDirectory + '/' + fileName);
+    if (!QDir::isAbsolutePath(fileName)) {
+        QString newfileName = QDir::cleanPath(QDir(currentDirectory + '/' + fileName).absolutePath());
+        qDebug() << "FtpControlConnection::toAbsolutePath" << fileName << "->" << newfileName;
+        return newfileName;
+    } else {
+        return QDir::cleanPath(QDir(fileName).canonicalPath());
+    }
 }
 
 void FtpControlConnection::reply(int code, const QString &details)
@@ -86,17 +90,19 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     else if ("PWD" == command)
         reply(227, '"' + QDir::toNativeSeparators(currentDirectory) + '"');
     else if ("CWD" == command)
-        cwd(commandParameters);
+        cwd(toAbsolutePath(commandParameters));
     else if ("TYPE" == command)
         reply(200);
     else if ("PASV" == command)
         pasv();
     else if ("LIST" == command)
-        list(currentDirectory);
+        list(toAbsolutePath(commandParameters));
     else if ("RETR" == command)
         retr(toAbsolutePath(commandParameters));
     else if ("STOR" == command)
         stor(toAbsolutePath(commandParameters));
+    else if ("MKD" == command)
+        mkd(toAbsolutePath(commandParameters));
     else
         reply(500);
 }
@@ -154,4 +160,12 @@ void FtpControlConnection::cwd(const QString &_dir)
     }
     currentDirectory = dir;
     reply(250);
+}
+
+void FtpControlConnection::mkd(const QString &dir)
+{
+    if (QDir().mkdir(dir))
+        reply(257);
+    else
+        reply(550);
 }
