@@ -31,6 +31,7 @@ private:
     void stor(const QString &fileName);
     void cwd(const QString &dir);
     void mkd(const QString &dir);
+    void rmd(const QString &dir);
     QTcpSocket *socket;
     QString buffer;
     QString currentDirectory;

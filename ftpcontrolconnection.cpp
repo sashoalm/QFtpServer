@@ -103,6 +103,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         stor(toAbsolutePath(commandParameters));
     else if ("MKD" == command)
         mkd(toAbsolutePath(commandParameters));
+    else if ("RMD" == command)
+        rmd(toAbsolutePath(commandParameters));
     else
         reply(500);
 }
@@ -166,6 +168,14 @@ void FtpControlConnection::mkd(const QString &dir)
 {
     if (QDir().mkdir(dir))
         reply(257);
+    else
+        reply(550);
+}
+
+void FtpControlConnection::rmd(const QString &dir)
+{
+    if (QDir().rmdir(dir))
+        reply(250);
     else
         reply(550);
 }
