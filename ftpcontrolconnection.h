@@ -33,9 +33,12 @@ private:
     void mkd(const QString &dir);
     void rmd(const QString &dir);
     void dele(const QString &fileName);
+    void rnfr(const QString &fileName);
+    void rnto(const QString &fileName);
     QTcpSocket *socket;
     QString buffer;
     QString currentDirectory;
+    QString rnfrStoredFileName;
     QPointer<FtpPassiveDataConnection> dataConnection;
 };
 
