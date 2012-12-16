@@ -29,13 +29,13 @@ void AsynchronousRetrieveCommand::start()
     emit reply(150);
     file = new QFile(fileName, this);
     file->open(QIODevice::ReadOnly);
-    connect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(sendNextBlock()));
-    sendNextBlock();
+    connect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(sendNextBlock(qint64)));
+    sendNextBlock(512*1024);
 }
 
-void AsynchronousRetrieveCommand::sendNextBlock()
+void AsynchronousRetrieveCommand::sendNextBlock(qint64 bytes)
 {
-    socket()->write(file->read(64*1024));
+    socket()->write(file->read(bytes));
     if (file->atEnd()) {
         disconnect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(sendNextBlock()));
         socket()->disconnectFromHost();
