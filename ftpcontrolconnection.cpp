@@ -121,6 +121,10 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         reply(350);
     else if ("NLST" == command)
         list(toAbsolutePath(commandParameters));
+    else if ("SIZE" == command)
+        size(toAbsolutePath(commandParameters));
+    else if ("QUIT" == command)
+        quit();
     else
         reply(502);
 
@@ -222,4 +226,22 @@ void FtpControlConnection::rnto(const QString &fileName)
         reply(250);
     else
         reply(550);
+}
+
+void FtpControlConnection::quit()
+{
+    reply(226);
+    if (dataConnection)
+        connect(dataConnection.data(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    else
+        deleteLater();
+}
+
+void FtpControlConnection::size(const QString &fileName)
+{
+    QFileInfo fi(fileName);
+    if (fi.isDir())
+        reply(550);
+    else
+        reply(213, QString("%1").arg(fi.size()));
 }
