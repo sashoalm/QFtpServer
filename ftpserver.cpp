@@ -1,5 +1,7 @@
 #include "ftpserver.h"
 #include "ftpcontrolconnection.h"
+
+#include <QtCore/QDebug>
 #include <QtNetwork/QTcpServer>
 
 FtpServer::FtpServer(QObject *parent, int port) :
