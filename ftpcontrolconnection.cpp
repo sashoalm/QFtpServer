@@ -119,6 +119,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         stor(toAbsolutePath(commandParameters), true);
     else if ("REST" == command)
         reply(350);
+    else if ("NLST" == command)
+        list(toAbsolutePath(commandParameters));
     else
         reply(502);
 
@@ -133,14 +135,14 @@ void FtpControlConnection::pasv()
     reply(227, QString("comment %1,%2,%3").arg(socket->localAddress().toString().replace('.',',')).arg(port/256).arg(port%256));
 }
 
-void FtpControlConnection::list(const QString &dir)
+void FtpControlConnection::list(const QString &dir, bool nameListOnly)
 {
     if (!dataConnection) {
         reply(425);
         return;
     }
 
-    dataConnection->list(dir);
+    dataConnection->list(dir, nameListOnly);
 }
 
 void FtpControlConnection::retr(const QString &fileName)

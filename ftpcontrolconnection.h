@@ -27,7 +27,7 @@ private:
     QString toAbsolutePath(const QString &fileName) const;
     void processCommand(const QString &entireCommand);
     void pasv();
-    void list(const QString &dir);
+    void list(const QString &dir, bool nameListOnly = false);
     void retr(const QString &fileName);
     void stor(const QString &fileName, bool appendMode = false);
     void cwd(const QString &dir);

@@ -9,7 +9,7 @@ class AsynchronousListCommand : public QObject
 {
     Q_OBJECT
 public:
-    explicit AsynchronousListCommand(QObject *parent, const QString &listDirectory);
+    explicit AsynchronousListCommand(QObject *parent, const QString &listDirectory, bool nameListOnly = false);
     ~AsynchronousListCommand();
 
 signals:
@@ -21,6 +21,7 @@ public slots:
 private:
     QTcpSocket* socket();
     QString listDirectory;
+    bool nameListOnly;
 };
 
 #endif // ASYNCHRONOUSLISTCOMMAND_H
