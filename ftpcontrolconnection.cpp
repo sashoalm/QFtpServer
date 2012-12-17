@@ -120,7 +120,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     else if ("REST" == command)
         reply(350);
     else
-        reply(500);
+        reply(502);
 
     lastProcessedCommand = entireCommand;
 }
