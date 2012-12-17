@@ -3,16 +3,21 @@
 #include "ftpserver.h"
 
 #include <QtCore/QCoreApplication>
+#include <QtCore/QSettings>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    new FtpServer(this);
+
+    loadSettings();
+    server = 0;
+    startServer();
 }
 
 MainWindow::~MainWindow()
 {
+    saveSettings();
     delete ui;
 }
 
@@ -68,4 +73,27 @@ void MainWindow::showExpanded()
 #else
     show();
 #endif
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings settings;
+    ui->spinBoxPort->setValue(settings.value("settings/port", 21).toInt());
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+    settings.setValue("settings/port", ui->spinBoxPort->value());
+}
+
+void MainWindow::startServer()
+{
+    delete server;
+    server = new FtpServer(this, ui->spinBoxPort->value());
+}
+
+void MainWindow::on_pushButtonRestartServer_clicked()
+{
+    startServer();
 }

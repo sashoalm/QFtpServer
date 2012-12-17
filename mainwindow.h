@@ -7,6 +7,8 @@ namespace Ui {
     class MainWindow;
 }
 
+class FtpServer;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -25,8 +27,15 @@ public:
 
     void showExpanded();
 
+private slots:
+    void on_pushButtonRestartServer_clicked();
+
 private:
     Ui::MainWindow *ui;
+    FtpServer *server;
+    void loadSettings();
+    void saveSettings();
+    void startServer();
 };
 
 #endif // MAINWINDOW_H

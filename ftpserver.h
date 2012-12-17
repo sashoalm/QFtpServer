@@ -7,7 +7,7 @@ class FtpServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpServer(QObject *parent = 0);
+    explicit FtpServer(QObject *parent, int port = 21);
     
 signals:
     
