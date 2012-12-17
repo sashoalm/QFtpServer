@@ -65,7 +65,7 @@ QString FtpControlConnection::toAbsolutePath(const QString &fileName) const
         qDebug() << "FtpControlConnection::toAbsolutePath" << fileName << "->" << newfileName;
         return newfileName;
     } else {
-        return QDir::cleanPath(QDir(fileName).canonicalPath());
+        return QDir::cleanPath(QDir(fileName).absolutePath());
     }
 }
 
