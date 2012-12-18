@@ -10,10 +10,13 @@
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QHostAddress>
 
-FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket) :
+FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &userName, const QString &password) :
     QObject(parent)
 {
     this->socket = socket;
+    this->userName = userName;
+    this->password = password;
+    isLoggedIn = false;
     socket->setParent(this);
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
@@ -28,11 +31,11 @@ FtpControlConnection::~FtpControlConnection()
 
 void FtpControlConnection::acceptNewData()
 {
-    buffer += QString::fromUtf8(socket->readAll());
+    buffer += QString::fromUtf8(socket->readAll()).replace("\r\n", "\n").replace('\r', '\n');
 
     // get the list of complete commands
-    bool hasCompleteLine = buffer.endsWith("\r\n");
-    QStringList list = buffer.split("\r\n", QString::SkipEmptyParts);
+    bool hasCompleteLine = buffer.endsWith("\n");
+    QStringList list = buffer.split("\n", QString::SkipEmptyParts);
     if (!hasCompleteLine) {
         buffer = list.last();
         list.removeLast();
@@ -88,45 +91,49 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     splitCommand(entireCommand, command, commandParameters);
 
     if ("USER" == command)
-        reply(331);
+        user(commandParameters);
     else if ("PASS" == command)
-        reply(230);
-    else if ("PWD" == command)
-        reply(227, '"' + QDir::toNativeSeparators(currentDirectory) + '"');
-    else if ("CWD" == command)
-        cwd(toAbsolutePath(commandParameters));
-    else if ("TYPE" == command)
-        reply(200);
-    else if ("PASV" == command)
-        pasv();
-    else if ("LIST" == command)
-        list(toAbsolutePath(commandParameters));
-    else if ("RETR" == command)
-        retr(toAbsolutePath(commandParameters));
-    else if ("STOR" == command)
-        stor(toAbsolutePath(commandParameters));
-    else if ("MKD" == command)
-        mkd(toAbsolutePath(commandParameters));
-    else if ("RMD" == command)
-        rmd(toAbsolutePath(commandParameters));
-    else if ("DELE" == command)
-        dele(toAbsolutePath(commandParameters));
-    else if ("RNFR" == command)
-        reply(350);
-    else if ("RNTO" == command)
-        rnto(toAbsolutePath(commandParameters));
-    else if ("APPE" == command)
-        stor(toAbsolutePath(commandParameters), true);
-    else if ("REST" == command)
-        reply(350);
-    else if ("NLST" == command)
-        list(toAbsolutePath(commandParameters));
-    else if ("SIZE" == command)
-        size(toAbsolutePath(commandParameters));
+        pass(commandParameters);
     else if ("QUIT" == command)
         quit();
-    else
-        reply(502);
+    else if (isLoggedIn) {
+        if ("PWD" == command)
+            reply(227, '"' + QDir::toNativeSeparators(currentDirectory) + '"');
+        else if ("CWD" == command)
+            cwd(toAbsolutePath(commandParameters));
+        else if ("TYPE" == command)
+            reply(200);
+        else if ("PASV" == command)
+            pasv();
+        else if ("LIST" == command)
+            list(toAbsolutePath(commandParameters));
+        else if ("RETR" == command)
+            retr(toAbsolutePath(commandParameters));
+        else if ("STOR" == command)
+            stor(toAbsolutePath(commandParameters));
+        else if ("MKD" == command)
+            mkd(toAbsolutePath(commandParameters));
+        else if ("RMD" == command)
+            rmd(toAbsolutePath(commandParameters));
+        else if ("DELE" == command)
+            dele(toAbsolutePath(commandParameters));
+        else if ("RNFR" == command)
+            reply(350);
+        else if ("RNTO" == command)
+            rnto(toAbsolutePath(commandParameters));
+        else if ("APPE" == command)
+            stor(toAbsolutePath(commandParameters), true);
+        else if ("REST" == command)
+            reply(350);
+        else if ("NLST" == command)
+            list(toAbsolutePath(commandParameters));
+        else if ("SIZE" == command)
+            size(toAbsolutePath(commandParameters));
+        else
+            reply(502);
+    } else {
+        reply(530);
+    }
 
     lastProcessedCommand = entireCommand;
 }
@@ -244,4 +251,24 @@ void FtpControlConnection::size(const QString &fileName)
         reply(550);
     else
         reply(213, QString("%1").arg(fi.size()));
+}
+
+void FtpControlConnection::user(const QString &userName)
+{
+    if (this->userName.isEmpty() || userName == this->userName)
+        reply(331);
+    else
+        reply(530);
+}
+
+void FtpControlConnection::pass(const QString &password)
+{
+    QString command;
+    QString commandParameters;
+    splitCommand(lastProcessedCommand, command, commandParameters);
+    if (this->password.isEmpty() || ("USER" == command && this->userName == commandParameters && this->password == password)) {
+        reply(230);
+        isLoggedIn = true;
+    } else
+        reply(530);
 }

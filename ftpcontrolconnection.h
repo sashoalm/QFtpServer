@@ -11,7 +11,7 @@ class FtpControlConnection : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpControlConnection(QObject *parent, QTcpSocket *socket);
+    explicit FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &userName = QString(), const QString &password = QString());
     ~FtpControlConnection();
     
 signals:
@@ -37,11 +37,16 @@ private:
     void rnto(const QString &fileName);
     void quit();
     void size(const QString &fileName);
+    void user(const QString &userName);
+    void pass(const QString &password);
     QTcpSocket *socket;
     QString buffer;
     QString currentDirectory;
     QString lastProcessedCommand;
     QPointer<FtpPassiveDataConnection> dataConnection;
+    bool isLoggedIn;
+    QString userName;
+    QString password;
 };
 
 #endif // FTPCONTROLCONNECTION_H
