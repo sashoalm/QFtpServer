@@ -26,7 +26,6 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, 
 
 FtpControlConnection::~FtpControlConnection()
 {
-    reply(221);
 }
 
 void FtpControlConnection::acceptNewData()
@@ -233,7 +232,7 @@ void FtpControlConnection::rnto(const QString &fileName)
 
 void FtpControlConnection::quit()
 {
-    reply(226);
+    reply(221);
     if (dataConnection)
         connect(dataConnection.data(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
     else
