@@ -43,7 +43,7 @@ void AsynchronousListCommand::start()
             line += (p & QFile::WriteOther) ? 'w' : '-';
             line += (p & QFile::ExeOther) ? 'x' : '-';
             // number of hard links, we say 1
-            line += " 1 " + fi.owner() + ' ' + fi.group() + ' ' + QString::number(fi.size()) + ' ';
+            line += " " + fi.owner() + ' ' + fi.group() + ' ' + QString::number(fi.size()) + ' ';
             QDateTime lm = fi.lastModified();
             line += lm.date().toString("MMM d") + ' ' + lm.time().toString("hh:mm") + ' ';
         }
