@@ -63,13 +63,12 @@ void FtpControlConnection::splitCommand(const QString &entireCommand, QString &c
 
 QString FtpControlConnection::toAbsolutePath(const QString &fileName) const
 {
-    if (!QDir::isAbsolutePath(fileName)) {
-        QString newfileName = QDir::cleanPath(QDir(currentDirectory + '/' + fileName).absolutePath());
-        qDebug() << "FtpControlConnection::toAbsolutePath" << fileName << "->" << newfileName;
-        return newfileName;
-    } else {
-        return QDir::cleanPath(QDir(fileName).absolutePath());
+    QFileInfo fi(fileName);
+    if (!fi.isAbsolute()) {
+        fi = QFileInfo(currentDirectory + '/' + fileName);
+        qDebug() << "FtpControlConnection::toAbsolutePath" << fileName << "->" << fi.absoluteFilePath();
     }
+    return fi.absoluteFilePath();
 }
 
 void FtpControlConnection::reply(int code, const QString &details)
@@ -186,18 +185,15 @@ void FtpControlConnection::stor(const QString &fileName, bool appendMode)
     dataConnection->stor(fileName, appendMode);
 }
 
-void FtpControlConnection::cwd(const QString &_dir)
+void FtpControlConnection::cwd(const QString &dir)
 {
-    QString dir = _dir;
-    if (!QDir::isAbsolutePath(dir))
-        dir = currentDirectory + '/' + dir;
-    dir = QDir::cleanPath(QDir(dir).canonicalPath());
-    if (!QDir().exists(dir)) {
+    QFileInfo fi(dir);
+    if (fi.exists() && fi.isDir()) {
+        currentDirectory = fi.absoluteFilePath();
+        reply(250);
+    } else {
         reply(550);
-        return;
     }
-    currentDirectory = dir;
-    reply(250);
 }
 
 void FtpControlConnection::mkd(const QString &dir)
