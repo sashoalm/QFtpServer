@@ -29,7 +29,11 @@ void AsynchronousRetrieveCommand::start()
 {
     emit reply(150);
     file = new QFile(fileName, this);
-    file->open(QIODevice::ReadOnly);
+    if (!file->open(QIODevice::ReadOnly)) {
+        emit reply(550);
+        deleteLater();
+        return;
+    }
     if (seekTo)
         file->seek(seekTo);
     connect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
