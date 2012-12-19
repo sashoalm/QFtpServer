@@ -44,7 +44,7 @@ void AsynchronousRetrieveCommand::refillSocketBuffer(qint64 bytes)
 {
     socket()->write(file->read(bytes));
     if (file->atEnd()) {
-        disconnect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer()));
+        disconnect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
         socket()->disconnectFromHost();
     }
 }
