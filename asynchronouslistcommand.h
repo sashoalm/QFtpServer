@@ -16,10 +16,10 @@ signals:
     void reply(int code, const QString &details = QString());
 
 public slots:
-    void start();
+    void start(QTcpSocket *socket);
 
 private:
-    QTcpSocket* socket();
+    QTcpSocket* socket;
     QString listDirectory;
     bool nameListOnly;
 };

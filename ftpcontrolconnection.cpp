@@ -124,9 +124,11 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         else if ("REST" == command)
             reply(350);
         else if ("NLST" == command)
-            list(toAbsolutePath(commandParameters));
+            list(toAbsolutePath(""));
         else if ("SIZE" == command)
             size(toAbsolutePath(commandParameters));
+        else if ("SYST" == command)
+            reply(215);
         else
             reply(502);
     } else {

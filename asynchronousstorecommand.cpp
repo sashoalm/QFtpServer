@@ -16,24 +16,21 @@ AsynchronousStoreCommand::~AsynchronousStoreCommand()
     emit reply(550);
 }
 
-void AsynchronousStoreCommand::start()
+void AsynchronousStoreCommand::start(QTcpSocket *socket)
 {
+    this->socket = socket;
+    socket->setParent(this);
+
     emit reply(150);
     file = new QFile(fileName, this);
     if (appendMode)
         file->open(QIODevice::Append);
     else
         file->open(QIODevice::WriteOnly);
-    connect(socket(), SIGNAL(readyRead()), this, SLOT(acceptNextBlock()));
+    connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNextBlock()));
 }
 
 void AsynchronousStoreCommand::acceptNextBlock()
 {
-    file->write(socket()->readAll());
-}
-
-QTcpSocket *AsynchronousStoreCommand::socket()
-{
-    FtpPassiveDataConnection *dataConnection = (FtpPassiveDataConnection *) parent();
-    return dataConnection->socket();
+    file->write(socket->readAll());
 }

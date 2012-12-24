@@ -17,13 +17,13 @@ signals:
     void reply(int code, const QString &details = QString());
 
 public slots:
-    void start();
+    void start(QTcpSocket *socket);
 
 private slots:
     void acceptNextBlock();
 
 private:
-    QTcpSocket* socket();
+    QTcpSocket* socket;
     QString fileName;
     QFile *file;
     bool appendMode;

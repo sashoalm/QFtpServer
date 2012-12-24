@@ -18,8 +18,11 @@ AsynchronousListCommand::~AsynchronousListCommand()
     emit reply(226);
 }
 
-void AsynchronousListCommand::start()
+void AsynchronousListCommand::start(QTcpSocket *socket)
 {
+    this->socket = socket;
+    socket->setParent(this);
+
     emit reply(150);
 
     // this is how the returned list looks
@@ -51,12 +54,6 @@ void AsynchronousListCommand::start()
         line += "\r\n";
     }
 
-    socket()->write(line.toUtf8());
-    socket()->disconnectFromHost();
-}
-
-QTcpSocket *AsynchronousListCommand::socket()
-{
-    FtpPassiveDataConnection *dataConnection = (FtpPassiveDataConnection *) parent();
-    return dataConnection->socket();
+    socket->write(line.toUtf8());
+    socket->disconnectFromHost();
 }

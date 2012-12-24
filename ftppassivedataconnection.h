@@ -19,7 +19,7 @@ public:
     void list(const QString &fileName, bool nameListOnly = false);
 
 signals:
-    void connected();
+    void connected(QTcpSocket *socket);
 
 private slots:
     void acceptNewConnection();

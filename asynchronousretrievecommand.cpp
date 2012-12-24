@@ -19,14 +19,11 @@ AsynchronousRetrieveCommand::~AsynchronousRetrieveCommand()
         emit reply(550);
 }
 
-QTcpSocket *AsynchronousRetrieveCommand::socket()
+void AsynchronousRetrieveCommand::start(QTcpSocket *socket)
 {
-    FtpPassiveDataConnection *dataConnection = (FtpPassiveDataConnection *) parent();
-    return dataConnection->socket();
-}
+    this->socket = socket;
+    socket->setParent(this);
 
-void AsynchronousRetrieveCommand::start()
-{
     emit reply(150);
     file = new QFile(fileName, this);
     if (!file->open(QIODevice::ReadOnly)) {
@@ -36,15 +33,15 @@ void AsynchronousRetrieveCommand::start()
     }
     if (seekTo)
         file->seek(seekTo);
-    connect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
+    connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
     refillSocketBuffer(512*1024);
 }
 
 void AsynchronousRetrieveCommand::refillSocketBuffer(qint64 bytes)
 {
-    socket()->write(file->read(bytes));
+    socket->write(file->read(bytes));
     if (file->atEnd()) {
-        disconnect(socket(), SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
-        socket()->disconnectFromHost();
+        disconnect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
+        socket->disconnectFromHost();
     }
 }

@@ -50,13 +50,13 @@ void FtpPassiveDataConnection::acceptNewConnection()
     connect(_socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
     delete server;
     server = 0;
-    emit connected();
+    emit connected(_socket);
 }
 
 void FtpPassiveDataConnection::startOrScheduleCommand(QObject *object)
 {
     connect(object, SIGNAL(reply(int,QString)), parent(), SLOT(reply(int,QString)));
-    connect(this, SIGNAL(connected()), object, SLOT(start()));
+    connect(this, SIGNAL(connected(QTcpSocket*)), object, SLOT(start(QTcpSocket*)));
     if (_socket)
-        emit connected();
+        emit connected(_socket);
 }
