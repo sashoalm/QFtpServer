@@ -25,13 +25,13 @@ void AsynchronousRetrieveCommand::start(QTcpSocket *socket)
     this->socket = socket;
     socket->setParent(this);
 
-    emit reply(150);
     file = new QFile(fileName, this);
     if (!file->open(QIODevice::ReadOnly)) {
         emit reply(550);
         deleteLater();
         return;
     }
+    emit reply(150);
     if (seekTo)
         file->seek(seekTo);
     connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
