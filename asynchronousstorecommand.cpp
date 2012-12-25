@@ -13,7 +13,7 @@ AsynchronousStoreCommand::AsynchronousStoreCommand(QObject *parent, const QStrin
 
 AsynchronousStoreCommand::~AsynchronousStoreCommand()
 {
-    emit reply(550);
+    emit reply(226);
 }
 
 void AsynchronousStoreCommand::start(QTcpSocket *socket)
