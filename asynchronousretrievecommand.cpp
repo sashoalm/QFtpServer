@@ -9,11 +9,12 @@ AsynchronousRetrieveCommand::AsynchronousRetrieveCommand(QObject *parent, const 
     this->fileName = fileName;
     this->seekTo = seekTo;
     file = 0;
+    success = false;
 }
 
 AsynchronousRetrieveCommand::~AsynchronousRetrieveCommand()
 {
-    if (file && file->isOpen() && file->atEnd())
+    if (success)
         emit reply(226);
     else
         emit reply(550);
@@ -39,9 +40,10 @@ void AsynchronousRetrieveCommand::start(QTcpSocket *socket)
 
 void AsynchronousRetrieveCommand::refillSocketBuffer(qint64 bytes)
 {
-    socket->write(file->read(bytes));
-    if (file->atEnd()) {
-        disconnect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
+    if (!file->atEnd()) {
+        socket->write(file->read(bytes));
+    } else {
         socket->disconnectFromHost();
+        success = true;
     }
 }

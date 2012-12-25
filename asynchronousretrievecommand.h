@@ -27,6 +27,7 @@ private:
     QString fileName;
     QFile *file;
     qint64 seekTo;
+    bool success;
 };
 
 #endif // ASYNCHRONOUSRETRIEVECOMMAND_H
