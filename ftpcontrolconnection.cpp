@@ -188,7 +188,15 @@ void FtpControlConnection::stor(const QString &fileName, bool appendMode)
         reply(425);
         return;
     }
-    dataConnection->stor(fileName, appendMode);
+
+    qint64 seekTo = 0;
+    QString command;
+    QString commandParameters;
+    splitCommand(lastProcessedCommand, command, commandParameters);
+    if ("REST" == command)
+        QTextStream(commandParameters.toUtf8()) >> seekTo;
+
+    dataConnection->stor(fileName, appendMode, seekTo);
 }
 
 void FtpControlConnection::cwd(const QString &dir)

@@ -31,9 +31,9 @@ void FtpPassiveDataConnection::retr(const QString &fileName, qint64 seekTo)
     startOrScheduleCommand(new AsynchronousRetrieveCommand(this, fileName, seekTo));
 }
 
-void FtpPassiveDataConnection::stor(const QString &fileName, bool appendMode)
+void FtpPassiveDataConnection::stor(const QString &fileName, bool appendMode, qint64 seekTo)
 {
-    startOrScheduleCommand(new AsynchronousStoreCommand(this, fileName, appendMode));
+    startOrScheduleCommand(new AsynchronousStoreCommand(this, fileName, appendMode, seekTo));
 }
 
 void FtpPassiveDataConnection::list(const QString &fileName, bool nameListOnly)

@@ -15,7 +15,7 @@ public:
     bool isConnected();
     QTcpSocket* socket() { return _socket; }
     void retr(const QString &fileName, qint64 seekTo = 0);
-    void stor(const QString &fileName, bool appendMode = false);
+    void stor(const QString &fileName, bool appendMode = false, qint64 seekTo = 0);
     void list(const QString &fileName, bool nameListOnly = false);
 
 signals:
