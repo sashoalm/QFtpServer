@@ -40,6 +40,7 @@ private:
     void size(const QString &fileName);
     void user(const QString &userName);
     void pass(const QString &password);
+    qint64 seekTo();
     QTcpSocket *socket;
     QString buffer;
     QString currentDirectory;

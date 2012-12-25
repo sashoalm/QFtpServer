@@ -173,13 +173,7 @@ void FtpControlConnection::retr(const QString &fileName)
         return;
     }
 
-    qint64 seekTo = 0;
-    QString command;
-    QString commandParameters;
-    splitCommand(lastProcessedCommand, command, commandParameters);
-    if ("REST" == command)
-        QTextStream(commandParameters.toUtf8()) >> seekTo;
-    dataConnection->retr(fileName, seekTo);
+    dataConnection->retr(fileName, seekTo());
 }
 
 void FtpControlConnection::stor(const QString &fileName, bool appendMode)
@@ -189,14 +183,7 @@ void FtpControlConnection::stor(const QString &fileName, bool appendMode)
         return;
     }
 
-    qint64 seekTo = 0;
-    QString command;
-    QString commandParameters;
-    splitCommand(lastProcessedCommand, command, commandParameters);
-    if ("REST" == command)
-        QTextStream(commandParameters.toUtf8()) >> seekTo;
-
-    dataConnection->stor(fileName, appendMode, seekTo);
+    dataConnection->stor(fileName, appendMode, seekTo());
 }
 
 void FtpControlConnection::cwd(const QString &dir)
@@ -281,4 +268,15 @@ void FtpControlConnection::pass(const QString &password)
         isLoggedIn = true;
     } else
         reply(530);
+}
+
+qint64 FtpControlConnection::seekTo()
+{
+    qint64 seekTo = 0;
+    QString command;
+    QString commandParameters;
+    splitCommand(lastProcessedCommand, command, commandParameters);
+    if ("REST" == command)
+        QTextStream(commandParameters.toUtf8()) >> seekTo;
+    return seekTo;
 }
