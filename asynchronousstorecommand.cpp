@@ -22,12 +22,13 @@ void AsynchronousStoreCommand::start(QTcpSocket *socket)
     this->socket = socket;
     socket->setParent(this);
 
-    emit reply(150);
     file = new QFile(fileName, this);
-    if (appendMode)
-        file->open(QIODevice::Append);
-    else
-        file->open(QIODevice::WriteOnly);
+    if (!file->open(appendMode ? QIODevice::Append : QIODevice::WriteOnly)) {
+        emit reply(451);
+        deleteLater();
+        return;
+    }
+    emit reply(150);
     if (seekTo)
         file->seek(seekTo);
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNextBlock()));
