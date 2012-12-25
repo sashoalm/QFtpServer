@@ -48,6 +48,11 @@ void FtpControlConnection::acceptNewData()
     }
 }
 
+void FtpControlConnection::disconnectFromHost()
+{
+    socket->disconnectFromHost();
+}
+
 void FtpControlConnection::splitCommand(const QString &entireCommand, QString &command, QString &commandParameters)
 {
     // split parameters and command
@@ -236,9 +241,9 @@ void FtpControlConnection::quit()
 {
     reply(221);
     if (dataConnection)
-        connect(dataConnection.data(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
+        connect(dataConnection.data(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
     else
-        deleteLater();
+        disconnectFromHost();
 }
 
 void FtpControlConnection::size(const QString &fileName)

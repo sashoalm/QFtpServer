@@ -21,6 +21,7 @@ public slots:
 
 private slots:
     void acceptNewData();
+    void disconnectFromHost();
 
 private:
     void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
