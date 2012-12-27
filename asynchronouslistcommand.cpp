@@ -1,5 +1,4 @@
 #include "asynchronouslistcommand.h"
-#include "ftppassivedataconnection.h"
 
 #include <QtCore/QFile>
 #include <QtCore/QDir>
@@ -7,7 +6,7 @@
 #include <QtNetwork/QTcpSocket>
 
 AsynchronousListCommand::AsynchronousListCommand(QObject *parent, const QString &fileName, bool nameListOnly) :
-    QObject(parent)
+    AsynchronousCommand(parent)
 {
     this->listDirectory = fileName;
     this->nameListOnly = nameListOnly;
@@ -22,6 +21,7 @@ void AsynchronousListCommand::start(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);
+    connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
 
     emit reply(150);
 

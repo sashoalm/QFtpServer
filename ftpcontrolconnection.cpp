@@ -1,5 +1,7 @@
 #include "ftpcontrolconnection.h"
-#include "ftppassivedataconnection.h"
+#include "asynchronouslistcommand.h"
+#include "asynchronousretrievecommand.h"
+#include "asynchronousstorecommand.h"
 #include <QtCore/QFileInfo>
 #include <QtCore/QDateTime>
 #include <QtCore/QDir>
@@ -8,7 +10,7 @@
 #include <QtCore/QEventLoop>
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpSocket>
-#include <QtNetwork/QHostAddress>
+#include <QtNetwork/QTcpServer>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &userName, const QString &password) :
     QObject(parent)
@@ -21,6 +23,9 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, 
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
     currentDirectory = QDir::rootPath();
+    dataConnectionServer = new QTcpServer(this);
+    connect(dataConnectionServer, SIGNAL(newConnection()), this, SLOT(acceptNewDataConnection()));
+    dataConnectionSocket = 0;
     reply(220);
 }
 
@@ -51,6 +56,16 @@ void FtpControlConnection::acceptNewData()
 void FtpControlConnection::disconnectFromHost()
 {
     socket->disconnectFromHost();
+}
+
+void FtpControlConnection::acceptNewDataConnection()
+{
+    qDebug() << "Incoming data connection," << (asynchronousCommand ? "starting transfer" : "now waiting for command");
+    if (asynchronousCommand)
+        asynchronousCommand->start(dataConnectionServer->nextPendingConnection());
+    else
+        dataConnectionSocket = dataConnectionServer->nextPendingConnection();
+    dataConnectionServer->close();
 }
 
 void FtpControlConnection::splitCommand(const QString &entireCommand, QString &command, QString &commandParameters)
@@ -143,47 +158,45 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     lastProcessedCommand = entireCommand;
 }
 
+void FtpControlConnection::startOrScheduleCommand(AsynchronousCommand *asynchronousCommand)
+{
+    if (!(dataConnectionServer->isListening() || dataConnectionSocket)) {
+        delete asynchronousCommand;
+        reply(425);
+        return;
+    }
+
+    this->asynchronousCommand = asynchronousCommand;
+    connect(asynchronousCommand, SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
+    if (dataConnectionSocket) {
+        asynchronousCommand->start(dataConnectionSocket);
+        dataConnectionSocket = 0;
+    }
+}
+
 void FtpControlConnection::pasv()
 {
-    delete dataConnection;
-    dataConnection = new FtpPassiveDataConnection(this);
-    int port = dataConnection->serverPort();
+    delete asynchronousCommand;
+    if (dataConnectionServer->isListening())
+        dataConnectionServer->close();
+    dataConnectionServer->listen();
+    int port = dataConnectionServer->serverPort();
     reply(227, QString("comment %1,%2,%3").arg(socket->localAddress().toString().replace('.',',')).arg(port/256).arg(port%256));
 }
 
 void FtpControlConnection::list(const QString &dir, bool nameListOnly)
 {
-    if (!dataConnection) {
-        reply(425);
-        return;
-    }
-
-    dataConnection->list(dir, nameListOnly);
+    startOrScheduleCommand(new AsynchronousListCommand(this, dir, nameListOnly));
 }
 
 void FtpControlConnection::retr(const QString &fileName)
 {
-    if (!dataConnection) {
-        reply(425);
-        return;
-    }
-    QFileInfo fi(fileName);
-    if (!(fi.exists() && fi.isFile())) {
-        reply(550);
-        return;
-    }
-
-    dataConnection->retr(fileName, seekTo());
+    startOrScheduleCommand(new AsynchronousRetrieveCommand(this, fileName, seekTo()));
 }
 
 void FtpControlConnection::stor(const QString &fileName, bool appendMode)
 {
-    if (!dataConnection) {
-        reply(425);
-        return;
-    }
-
-    dataConnection->stor(fileName, appendMode, seekTo());
+    startOrScheduleCommand(new AsynchronousStoreCommand(this, fileName, appendMode, seekTo()));
 }
 
 void FtpControlConnection::cwd(const QString &dir)
@@ -235,8 +248,8 @@ void FtpControlConnection::rnto(const QString &fileName)
 void FtpControlConnection::quit()
 {
     reply(221);
-    if (dataConnection)
-        connect(dataConnection.data(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
+    if (asynchronousCommand)
+        connect(asynchronousCommand.data(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
     else
         disconnectFromHost();
 }

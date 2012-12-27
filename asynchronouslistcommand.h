@@ -1,24 +1,18 @@
 #ifndef ASYNCHRONOUSLISTCOMMAND_H
 #define ASYNCHRONOUSLISTCOMMAND_H
 
-#include <QtCore/QObject>
+#include "asynchronouscommand.h"
 
-class QTcpSocket;
-
-class AsynchronousListCommand : public QObject
+class AsynchronousListCommand : public AsynchronousCommand
 {
     Q_OBJECT
 public:
     explicit AsynchronousListCommand(QObject *parent, const QString &listDirectory, bool nameListOnly = false);
     ~AsynchronousListCommand();
 
-signals:
-    void reply(int code, const QString &details = QString());
-
-public slots:
+private:
     void start(QTcpSocket *socket);
 
-private:
     QTcpSocket* socket;
     QString listDirectory;
     bool nameListOnly;

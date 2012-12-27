@@ -1,10 +1,9 @@
 #include "asynchronousretrievecommand.h"
-#include "ftppassivedataconnection.h"
 #include <QtCore/QFile>
 #include <QtNetwork/QTcpSocket>
 
 AsynchronousRetrieveCommand::AsynchronousRetrieveCommand(QObject *parent, const QString &fileName, qint64 seekTo) :
-    QObject(parent)
+    AsynchronousCommand(parent)
 {
     this->fileName = fileName;
     this->seekTo = seekTo;
@@ -24,6 +23,7 @@ void AsynchronousRetrieveCommand::start(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);
+    connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
 
     file = new QFile(fileName, this);
     if (!file->open(QIODevice::ReadOnly)) {

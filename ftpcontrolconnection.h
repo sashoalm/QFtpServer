@@ -4,8 +4,9 @@
 #include <QtCore/QObject>
 #include <QtCore/QPointer>
 
+class QTcpServer;
 class QTcpSocket;
-class FtpPassiveDataConnection;
+class AsynchronousCommand;
 
 class FtpControlConnection : public QObject
 {
@@ -22,11 +23,13 @@ public slots:
 private slots:
     void acceptNewData();
     void disconnectFromHost();
+    void acceptNewDataConnection();
 
 private:
     void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
     QString toAbsolutePath(const QString &fileName) const;
     void processCommand(const QString &entireCommand);
+    void startOrScheduleCommand(AsynchronousCommand *asynchronousCommand);
     void pasv();
     void list(const QString &dir, bool nameListOnly = false);
     void retr(const QString &fileName);
@@ -45,10 +48,12 @@ private:
     QString buffer;
     QString currentDirectory;
     QString lastProcessedCommand;
-    QPointer<FtpPassiveDataConnection> dataConnection;
     bool isLoggedIn;
     QString userName;
     QString password;
+    QTcpServer *dataConnectionServer;
+    QPointer<AsynchronousCommand> asynchronousCommand;
+    QTcpSocket *dataConnectionSocket;
 };
 
 #endif // FTPCONTROLCONNECTION_H
