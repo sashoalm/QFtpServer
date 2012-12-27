@@ -79,18 +79,30 @@ void MainWindow::loadSettings()
 {
     QSettings settings;
     ui->spinBoxPort->setValue(settings.value("settings/port", 21).toInt());
+    ui->lineEditUserName->setText(settings.value("settings/username", "admin").toString());
+    ui->lineEditPassword->setText(settings.value("settings/password", "qt").toString());
+    ui->checkBoxAnonymous->setChecked(settings.value("settings/anonymous", false).toBool());
 }
 
 void MainWindow::saveSettings()
 {
     QSettings settings;
     settings.setValue("settings/port", ui->spinBoxPort->value());
+    settings.setValue("settings/username", ui->lineEditUserName->text());
+    settings.setValue("settings/password", ui->lineEditPassword->text());
+    settings.setValue("settings/anonymous", ui->checkBoxAnonymous->isChecked());
 }
 
 void MainWindow::startServer()
 {
     delete server;
-    server = new FtpServer(this, ui->spinBoxPort->value());
+    QString userName;
+    QString password;
+    if (!ui->checkBoxAnonymous->isChecked()) {
+        userName = ui->lineEditUserName->text();
+        password = ui->lineEditPassword->text();
+    }
+    server = new FtpServer(this, ui->spinBoxPort->value(), userName, password);
 }
 
 void MainWindow::on_pushButtonRestartServer_clicked()
