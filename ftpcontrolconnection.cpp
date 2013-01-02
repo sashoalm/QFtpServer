@@ -81,7 +81,7 @@ void FtpControlConnection::splitCommand(const QString &entireCommand, QString &c
     }
 }
 
-QString FtpControlConnection::toAbsolutePath(const QString &fileName) const
+QString FtpControlConnection::toLocalPath(const QString &fileName) const
 {
     QFileInfo fi(fileName);
     if (!fi.isAbsolute()) {
@@ -129,29 +129,29 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         else if ("PASV" == command)
             pasv();
         else if ("LIST" == command)
-            list(toAbsolutePath(commandParameters));
+            list(toLocalPath(commandParameters));
         else if ("RETR" == command)
-            retr(toAbsolutePath(commandParameters));
+            retr(toLocalPath(commandParameters));
         else if ("STOR" == command)
-            stor(toAbsolutePath(commandParameters));
+            stor(toLocalPath(commandParameters));
         else if ("MKD" == command)
-            mkd(toAbsolutePath(commandParameters));
+            mkd(toLocalPath(commandParameters));
         else if ("RMD" == command)
-            rmd(toAbsolutePath(commandParameters));
+            rmd(toLocalPath(commandParameters));
         else if ("DELE" == command)
-            dele(toAbsolutePath(commandParameters));
+            dele(toLocalPath(commandParameters));
         else if ("RNFR" == command)
             reply(350);
         else if ("RNTO" == command)
-            rnto(toAbsolutePath(commandParameters));
+            rnto(toLocalPath(commandParameters));
         else if ("APPE" == command)
-            stor(toAbsolutePath(commandParameters), true);
+            stor(toLocalPath(commandParameters), true);
         else if ("REST" == command)
             reply(350);
         else if ("NLST" == command)
-            list(toAbsolutePath(""));
+            list(toLocalPath(""));
         else if ("SIZE" == command)
-            size(toAbsolutePath(commandParameters));
+            size(toLocalPath(commandParameters));
         else if ("SYST" == command)
             reply(215);
         else
@@ -206,7 +206,7 @@ void FtpControlConnection::stor(const QString &fileName, bool appendMode)
 
 void FtpControlConnection::cwd(const QString &dir)
 {
-    QFileInfo fi(toAbsolutePath(dir));
+    QFileInfo fi(toLocalPath(dir));
     if (fi.exists() && fi.isDir()) {
         QFileInfo fi(dir);
         if (fi.isAbsolute())
@@ -248,7 +248,7 @@ void FtpControlConnection::rnto(const QString &fileName)
     QString command;
     QString commandParameters;
     splitCommand(lastProcessedCommand, command, commandParameters);
-    if ("RNFR" == command && QDir().rename(toAbsolutePath(commandParameters), fileName))
+    if ("RNFR" == command && QDir().rename(toLocalPath(commandParameters), fileName))
         reply(250);
     else
         reply(550);

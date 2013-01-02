@@ -27,7 +27,7 @@ private slots:
 
 private:
     void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
-    QString toAbsolutePath(const QString &fileName) const;
+    QString toLocalPath(const QString &fileName) const;
     void processCommand(const QString &entireCommand);
     void startOrScheduleCommand(AsynchronousCommand *asynchronousCommand);
     void pasv();
