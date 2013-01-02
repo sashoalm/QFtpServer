@@ -4,6 +4,8 @@
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QSettings>
+#include <QtNetwork/QNetworkInterface>
+#include <QtNetwork/QHostAddress>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -13,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     loadSettings();
     server = 0;
     startServer();
+    displayLanIpAddress();
 }
 
 MainWindow::~MainWindow()
@@ -103,6 +106,14 @@ void MainWindow::startServer()
         password = ui->lineEditPassword->text();
     }
     server = new FtpServer(this, ui->spinBoxPort->value(), userName, password);
+}
+
+void MainWindow::displayLanIpAddress()
+{
+    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
+             ui->labelLanIp->setText(address.toString());
+    }
 }
 
 void MainWindow::on_pushButtonRestartServer_clicked()

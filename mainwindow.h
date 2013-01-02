@@ -36,6 +36,7 @@ private:
     void loadSettings();
     void saveSettings();
     void startServer();
+    void displayLanIpAddress();
 };
 
 #endif // MAINWINDOW_H
