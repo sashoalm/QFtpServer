@@ -106,6 +106,10 @@ void MainWindow::startServer()
         password = ui->lineEditPassword->text();
     }
     server = new FtpServer(this, ui->spinBoxPort->value(), userName, password);
+    if (server->isListening())
+        ui->labelStatus->setText("Listening...");
+    else
+        ui->labelStatus->setText("Not listening...");
 }
 
 void MainWindow::displayLanIpAddress()

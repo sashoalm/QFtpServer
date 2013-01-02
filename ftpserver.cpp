@@ -7,16 +7,20 @@
 FtpServer::FtpServer(QObject *parent, int port, const QString &userName, const QString &password) :
     QObject(parent)
 {
-    QTcpServer *server = new QTcpServer(this);
+    server = new QTcpServer(this);
     server->listen(QHostAddress::Any, port);
     connect(server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
     this->userName = userName;
     this->password = password;
 }
 
+bool FtpServer::isListening()
+{
+    return server->isListening();
+}
+
 void FtpServer::acceptConnection()
 {
     qDebug() << "FtpServer::acceptConnection";
-    QTcpServer *server = (QTcpServer *) sender();
     new FtpControlConnection(this, server->nextPendingConnection(), userName, password);
 }
