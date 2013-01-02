@@ -83,14 +83,27 @@ void FtpControlConnection::splitCommand(const QString &entireCommand, QString &c
 
 QString FtpControlConnection::toLocalPath(const QString &fileName) const
 {
-    QFileInfo fi(fileName);
-    if (!fi.isAbsolute()) {
-        fi = QFileInfo(currentDirectory + '/' + fileName);
+    QString localPath = fileName;
+    localPath.replace('\\', '/');
+    if (!localPath.startsWith('/'))
+        localPath = currentDirectory + '/' + localPath;
+
+    QStringList components;
+    foreach (const QString &component, localPath.split('/', QString::SkipEmptyParts)) {
+        if (component == "..") {
+            if (components.isEmpty())
+                return QString();
+            components.pop_back();
+        } else if (component != ".") {
+            components += component;
+        }
     }
-    QString localPath = QDir::cleanPath(fi.absoluteFilePath());
-    if (localPath.startsWith("/../") || localPath == "/..")
-        return QString();
-    localPath = QDir::cleanPath(rootPath + '/' + localPath);
+
+    localPath = rootPath;
+    foreach (const QString &component, components)
+        localPath += '/' + component;
+    localPath = QDir::cleanPath(localPath);
+
     qDebug() << "FtpControlConnection::toLocalPath" << fileName << "->" << localPath;
     return localPath;
 }
