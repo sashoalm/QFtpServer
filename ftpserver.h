@@ -9,7 +9,7 @@ class FtpServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpServer(QObject *parent, int port = 21, const QString &userName = QString(), const QString &password = QString());
+    explicit FtpServer(QObject *parent, const QString &rootPath, int port = 21, const QString &userName = QString(), const QString &password = QString());
     bool isListening();
 
 signals:
@@ -20,6 +20,7 @@ private slots:
 private:
     QString userName;
     QString password;
+    QString rootPath;
     QTcpServer *server;
 };
 

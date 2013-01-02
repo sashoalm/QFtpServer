@@ -6,6 +6,7 @@
 #include <QtCore/QSettings>
 #include <QtNetwork/QNetworkInterface>
 #include <QtNetwork/QHostAddress>
+#include <QtGui/QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -84,6 +85,7 @@ void MainWindow::loadSettings()
     ui->spinBoxPort->setValue(settings.value("settings/port", 21).toInt());
     ui->lineEditUserName->setText(settings.value("settings/username", "admin").toString());
     ui->lineEditPassword->setText(settings.value("settings/password", "qt").toString());
+    ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
     ui->checkBoxAnonymous->setChecked(settings.value("settings/anonymous", false).toBool());
 }
 
@@ -93,6 +95,7 @@ void MainWindow::saveSettings()
     settings.setValue("settings/port", ui->spinBoxPort->value());
     settings.setValue("settings/username", ui->lineEditUserName->text());
     settings.setValue("settings/password", ui->lineEditPassword->text());
+    settings.setValue("settings/rootpath", ui->lineEditRootPath->text());
     settings.setValue("settings/anonymous", ui->checkBoxAnonymous->isChecked());
 }
 
@@ -105,7 +108,7 @@ void MainWindow::startServer()
         userName = ui->lineEditUserName->text();
         password = ui->lineEditPassword->text();
     }
-    server = new FtpServer(this, ui->spinBoxPort->value(), userName, password);
+    server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName, password);
     if (server->isListening())
         ui->labelStatus->setText("Listening...");
     else
@@ -123,4 +126,12 @@ void MainWindow::displayLanIpAddress()
 void MainWindow::on_pushButtonRestartServer_clicked()
 {
     startServer();
+}
+
+void MainWindow::on_toolButtonBrowse_clicked()
+{
+    QString rootPath = QFileDialog::getExistingDirectory(this, QString(), ui->lineEditRootPath->text());
+    if (rootPath.isEmpty())
+        return;
+    ui->lineEditRootPath->setText(rootPath);
 }

@@ -12,7 +12,7 @@ class FtpControlConnection : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &userName = QString(), const QString &password = QString());
+    explicit FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &rootPath, const QString &userName = QString(), const QString &password = QString());
     ~FtpControlConnection();
     
 signals:
@@ -51,6 +51,7 @@ private:
     bool isLoggedIn;
     QString userName;
     QString password;
+    QString rootPath;
     QTcpServer *dataConnectionServer;
     QPointer<AsynchronousCommand> asynchronousCommand;
     QTcpSocket *dataConnectionSocket;

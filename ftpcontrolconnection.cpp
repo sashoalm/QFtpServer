@@ -12,17 +12,18 @@
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QTcpServer>
 
-FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &userName, const QString &password) :
+FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &rootPath, const QString &userName, const QString &password) :
     QObject(parent)
 {
     this->socket = socket;
     this->userName = userName;
     this->password = password;
+    this->rootPath = rootPath;
     isLoggedIn = false;
     socket->setParent(this);
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
-    currentDirectory = QDir::rootPath();
+    currentDirectory = "/";
     dataConnectionServer = new QTcpServer(this);
     connect(dataConnectionServer, SIGNAL(newConnection()), this, SLOT(acceptNewDataConnection()));
     dataConnectionSocket = 0;
@@ -85,9 +86,13 @@ QString FtpControlConnection::toAbsolutePath(const QString &fileName) const
     QFileInfo fi(fileName);
     if (!fi.isAbsolute()) {
         fi = QFileInfo(currentDirectory + '/' + fileName);
-        qDebug() << "FtpControlConnection::toAbsolutePath" << fileName << "->" << fi.absoluteFilePath();
     }
-    return fi.absoluteFilePath();
+    QString localPath = QDir::cleanPath(fi.absoluteFilePath());
+    if (localPath.startsWith("/../") || localPath == "/..")
+        return QString();
+    localPath = QDir::cleanPath(rootPath + '/' + localPath);
+    qDebug() << "FtpControlConnection::toLocalPath" << fileName << "->" << localPath;
+    return localPath;
 }
 
 void FtpControlConnection::reply(int code, const QString &details)
@@ -116,9 +121,9 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         quit();
     else if (isLoggedIn) {
         if ("PWD" == command)
-            reply(227, '"' + QDir::toNativeSeparators(currentDirectory) + '"');
+            reply(227, '"' + currentDirectory + '"');
         else if ("CWD" == command)
-            cwd(toAbsolutePath(commandParameters));
+            cwd(commandParameters);
         else if ("TYPE" == command)
             reply(200);
         else if ("PASV" == command)
@@ -201,9 +206,13 @@ void FtpControlConnection::stor(const QString &fileName, bool appendMode)
 
 void FtpControlConnection::cwd(const QString &dir)
 {
-    QFileInfo fi(dir);
+    QFileInfo fi(toAbsolutePath(dir));
     if (fi.exists() && fi.isDir()) {
-        currentDirectory = fi.absoluteFilePath();
+        QFileInfo fi(dir);
+        if (fi.isAbsolute())
+            currentDirectory = QDir::cleanPath(dir);
+        else
+            currentDirectory = QDir::cleanPath(currentDirectory + '/' + dir);
         reply(250);
     } else {
         reply(550);

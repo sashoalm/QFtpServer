@@ -30,6 +30,8 @@ public:
 private slots:
     void on_pushButtonRestartServer_clicked();
 
+    void on_toolButtonBrowse_clicked();
+
 private:
     Ui::MainWindow *ui;
     FtpServer *server;

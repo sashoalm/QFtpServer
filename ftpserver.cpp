@@ -4,7 +4,7 @@
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpServer>
 
-FtpServer::FtpServer(QObject *parent, int port, const QString &userName, const QString &password) :
+FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const QString &userName, const QString &password) :
     QObject(parent)
 {
     server = new QTcpServer(this);
@@ -12,6 +12,7 @@ FtpServer::FtpServer(QObject *parent, int port, const QString &userName, const Q
     connect(server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
     this->userName = userName;
     this->password = password;
+    this->rootPath = rootPath;
 }
 
 bool FtpServer::isListening()
@@ -22,5 +23,5 @@ bool FtpServer::isListening()
 void FtpServer::acceptConnection()
 {
     qDebug() << "FtpServer::acceptConnection";
-    new FtpControlConnection(this, server->nextPendingConnection(), userName, password);
+    new FtpControlConnection(this, server->nextPendingConnection(), rootPath, userName, password);
 }
