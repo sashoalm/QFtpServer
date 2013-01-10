@@ -1,5 +1,6 @@
 #include "ftpserver.h"
 #include "ftpcontrolconnection.h"
+#include "sslserver.h"
 
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpServer>
@@ -7,7 +8,7 @@
 FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const QString &userName, const QString &password) :
     QObject(parent)
 {
-    server = new QTcpServer(this);
+    server = new SslServer(this);
     server->listen(QHostAddress::Any, port);
     connect(server, SIGNAL(newConnection()), this, SLOT(acceptConnection()));
     this->userName = userName;

@@ -28,14 +28,16 @@ SOURCES += main.cpp mainwindow.cpp \
     asynchronousretrievecommand.cpp \
     asynchronousstorecommand.cpp \
     asynchronouslistcommand.cpp \
-    asynchronouscommand.cpp
+    asynchronouscommand.cpp \
+    sslserver.cpp
 HEADERS += mainwindow.h \
     ftpserver.h \
     ftpcontrolconnection.h \
     asynchronousretrievecommand.h \
     asynchronousstorecommand.h \
     asynchronouslistcommand.h \
-    asynchronouscommand.h
+    asynchronouscommand.h \
+    sslserver.h
 FORMS += mainwindow.ui
 QT += network
 
@@ -49,3 +51,10 @@ CONFIG(release, debug|release) {
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
 qtcAddDeployment()
+
+RESOURCES += \
+    res.qrc
+
+OTHER_FILES += \
+    privkey.pem \
+    cacert.pem

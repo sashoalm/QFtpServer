@@ -2,6 +2,8 @@
 #include "asynchronouslistcommand.h"
 #include "asynchronousretrievecommand.h"
 #include "asynchronousstorecommand.h"
+#include "sslserver.h"
+
 #include <QtCore/QFileInfo>
 #include <QtCore/QDateTime>
 #include <QtCore/QDir>
@@ -11,6 +13,7 @@
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QTcpServer>
+#include <QtNetwork/QSslSocket>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &rootPath, const QString &userName, const QString &password) :
     QObject(parent)
@@ -132,6 +135,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         pass(commandParameters);
     else if ("QUIT" == command)
         quit();
+    else if ("AUTH" == command && "TLS" == commandParameters)
+        auth();
     else if (isLoggedIn) {
         if ("PWD" == command)
             reply(227, '"' + currentDirectory + '"');
@@ -303,6 +308,13 @@ void FtpControlConnection::pass(const QString &password)
         isLoggedIn = true;
     } else
         reply(530);
+}
+
+void FtpControlConnection::auth()
+{
+    reply(234);
+    QSslSocket *sslSocket = (QSslSocket*) socket;
+    sslSocket->startServerEncryption();
 }
 
 qint64 FtpControlConnection::seekTo()
