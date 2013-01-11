@@ -11,8 +11,9 @@ public:
     ~AsynchronousListCommand();
 
 private:
-    void start(QTcpSocket *socket);
+    void startImplementation(QTcpSocket *socket);
 
+private:
     QTcpSocket* socket;
     QString listDirectory;
     bool nameListOnly;

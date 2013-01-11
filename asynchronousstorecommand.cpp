@@ -16,7 +16,7 @@ AsynchronousStoreCommand::~AsynchronousStoreCommand()
     emit reply(226);
 }
 
-void AsynchronousStoreCommand::start(QTcpSocket *socket)
+void AsynchronousStoreCommand::startImplementation(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);

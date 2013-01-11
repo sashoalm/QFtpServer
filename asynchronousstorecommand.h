@@ -16,7 +16,7 @@ private slots:
     void acceptNextBlock();
 
 private:
-    void start(QTcpSocket *socket);
+    void startImplementation(QTcpSocket *socket);
 
     QTcpSocket* socket;
     QString fileName;

@@ -19,7 +19,7 @@ AsynchronousRetrieveCommand::~AsynchronousRetrieveCommand()
         emit reply(550);
 }
 
-void AsynchronousRetrieveCommand::start(QTcpSocket *socket)
+void AsynchronousRetrieveCommand::startImplementation(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);

@@ -16,7 +16,7 @@ private slots:
     void refillSocketBuffer(qint64 bytes=0);
 
 private:
-    void start(QTcpSocket *socket);
+    void startImplementation(QTcpSocket *socket);
 
     QTcpSocket* socket;
     QString fileName;

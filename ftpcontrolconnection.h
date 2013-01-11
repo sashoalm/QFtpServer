@@ -44,6 +44,7 @@ private:
     void user(const QString &userName);
     void pass(const QString &password);
     void auth();
+    void prot(const QString &protectionLevel);
     qint64 seekTo();
     QTcpSocket *socket;
     QString buffer;
@@ -56,6 +57,7 @@ private:
     QTcpServer *dataConnectionServer;
     QPointer<AsynchronousCommand> asynchronousCommand;
     QTcpSocket *dataConnectionSocket;
+    bool encryptDataConnection;
 };
 
 #endif // FTPCONTROLCONNECTION_H

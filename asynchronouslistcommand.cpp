@@ -17,7 +17,7 @@ AsynchronousListCommand::~AsynchronousListCommand()
     emit reply(226);
 }
 
-void AsynchronousListCommand::start(QTcpSocket *socket)
+void AsynchronousListCommand::startImplementation(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);

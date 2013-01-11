@@ -15,7 +15,13 @@ signals:
     void reply(int code, const QString &details = QString());
 
 public:
-    virtual void start(QTcpSocket *socket) = 0;
+    void start(QTcpSocket *socket, bool encryptDataConnection);
+
+protected:
+    virtual void startImplementation(QTcpSocket *socket) = 0;
+
+private slots:
+    void encrypted();
 };
 
 #endif // ASYNCHRONOUSCOMMAND_H

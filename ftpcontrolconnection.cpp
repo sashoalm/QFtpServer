@@ -11,8 +11,6 @@
 #include <QtCore/QDir>
 #include <QtCore/QEventLoop>
 #include <QtCore/QDebug>
-#include <QtNetwork/QTcpSocket>
-#include <QtNetwork/QTcpServer>
 #include <QtNetwork/QSslSocket>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &rootPath, const QString &userName, const QString &password) :
@@ -23,11 +21,12 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, 
     this->password = password;
     this->rootPath = rootPath;
     isLoggedIn = false;
+    encryptDataConnection = false;
     socket->setParent(this);
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
     currentDirectory = "/";
-    dataConnectionServer = new QTcpServer(this);
+    dataConnectionServer = new SslServer(this);
     connect(dataConnectionServer, SIGNAL(newConnection()), this, SLOT(acceptNewDataConnection()));
     dataConnectionSocket = 0;
     reply(220);
@@ -66,7 +65,7 @@ void FtpControlConnection::acceptNewDataConnection()
 {
     qDebug() << "Incoming data connection," << (asynchronousCommand ? "starting transfer" : "now waiting for command");
     if (asynchronousCommand)
-        asynchronousCommand->start(dataConnectionServer->nextPendingConnection());
+        asynchronousCommand->start(dataConnectionServer->nextPendingConnection(), encryptDataConnection);
     else
         dataConnectionSocket = dataConnectionServer->nextPendingConnection();
     dataConnectionServer->close();
@@ -172,6 +171,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
             size(toLocalPath(commandParameters));
         else if ("SYST" == command)
             reply(215);
+        else if ("PROT" == command)
+            prot(commandParameters);
         else
             reply(502);
     } else {
@@ -192,7 +193,7 @@ void FtpControlConnection::startOrScheduleCommand(AsynchronousCommand *asynchron
     this->asynchronousCommand = asynchronousCommand;
     connect(asynchronousCommand, SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
     if (dataConnectionSocket) {
-        asynchronousCommand->start(dataConnectionSocket);
+        asynchronousCommand->start(dataConnectionSocket, encryptDataConnection);
         dataConnectionSocket = 0;
     }
 }
@@ -315,6 +316,19 @@ void FtpControlConnection::auth()
     reply(234);
     QSslSocket *sslSocket = (QSslSocket*) socket;
     sslSocket->startServerEncryption();
+}
+
+void FtpControlConnection::prot(const QString &protectionLevel)
+{
+    if ("C" == protectionLevel)
+        encryptDataConnection = false;
+    else if ("P" == protectionLevel)
+        encryptDataConnection = true;
+    else {
+        reply(502);
+        return;
+    }
+    reply(200);
 }
 
 qint64 FtpControlConnection::seekTo()
