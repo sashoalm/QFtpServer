@@ -345,7 +345,7 @@ void FtpControlConnection::feat()
 {
     socket->write(
                 "211-Features:\r\n"
-                "UTF8\r\n"
+                " UTF8\r\n"
                 "211 End\r\n"
                 );
 }
