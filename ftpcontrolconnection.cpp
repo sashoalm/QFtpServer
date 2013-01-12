@@ -170,7 +170,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         else if ("SIZE" == command)
             size(toLocalPath(commandParameters));
         else if ("SYST" == command)
-            reply(215);
+            reply(215, "UNIX");
         else if ("PROT" == command)
             prot(commandParameters);
         else
