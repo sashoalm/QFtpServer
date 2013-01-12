@@ -5,6 +5,9 @@
 
 class QFile;
 
+// the ftp retrieve command
+// used to download files from the ftp server
+
 class FtpRetrCommand : public FtpCommand
 {
     Q_OBJECT

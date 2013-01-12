@@ -5,6 +5,10 @@
 
 class QTcpServer;
 
+// the ftp server
+// listens on a port, and starts a new control
+// connection each time it gets connected
+
 class FtpServer : public QObject
 {
     Q_OBJECT

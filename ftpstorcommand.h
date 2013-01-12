@@ -5,6 +5,9 @@
 
 class QFile;
 
+// the ftp stor command
+// used to upload files to the ftp server
+
 class FtpStorCommand : public FtpCommand
 {
     Q_OBJECT

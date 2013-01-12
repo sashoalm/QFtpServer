@@ -8,6 +8,12 @@ class QTcpServer;
 class QTcpSocket;
 class FtpCommand;
 
+// implements the ftp control connection
+// reads the ftp commands from the control connection socket
+// parses each line and maps it to an implemented command
+// all of the ftp commands except the ones that require a
+// data connection are implemented here
+
 class FtpControlConnection : public QObject
 {
     Q_OBJECT
