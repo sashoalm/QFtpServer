@@ -337,8 +337,10 @@ void FtpControlConnection::prot(const QString &protectionLevel)
 
 void FtpControlConnection::cdup()
 {
-    currentDirectory = QFileInfo(currentDirectory).absolutePath();
-    reply(250);
+    if ("/" == currentDirectory)
+        reply(250);
+    else
+        cwd("..");
 }
 
 void FtpControlConnection::feat()
