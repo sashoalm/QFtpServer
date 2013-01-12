@@ -1,9 +1,9 @@
-#include "asynchronousstorecommand.h"
+#include "ftpstorcommand.h"
 #include <QtCore/QFile>
 #include <QtNetwork/QTcpSocket>
 
-AsynchronousStoreCommand::AsynchronousStoreCommand(QObject *parent, const QString &fileName, bool appendMode, qint64 seekTo) :
-    AsynchronousCommand(parent)
+FtpStorCommand::FtpStorCommand(QObject *parent, const QString &fileName, bool appendMode, qint64 seekTo) :
+    FtpCommand(parent)
 {
     this->fileName = fileName;
     this->appendMode = appendMode;
@@ -11,12 +11,12 @@ AsynchronousStoreCommand::AsynchronousStoreCommand(QObject *parent, const QStrin
     this->seekTo = seekTo;
 }
 
-AsynchronousStoreCommand::~AsynchronousStoreCommand()
+FtpStorCommand::~FtpStorCommand()
 {
     emit reply(226);
 }
 
-void AsynchronousStoreCommand::startImplementation(QTcpSocket *socket)
+void FtpStorCommand::startImplementation(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);
@@ -34,7 +34,7 @@ void AsynchronousStoreCommand::startImplementation(QTcpSocket *socket)
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNextBlock()));
 }
 
-void AsynchronousStoreCommand::acceptNextBlock()
+void FtpStorCommand::acceptNextBlock()
 {
     file->write(socket->readAll());
 }

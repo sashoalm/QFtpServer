@@ -1,7 +1,7 @@
 #include "ftpcontrolconnection.h"
-#include "asynchronouslistcommand.h"
-#include "asynchronousretrievecommand.h"
-#include "asynchronousstorecommand.h"
+#include "ftplistcommand.h"
+#include "ftpretrcommand.h"
+#include "ftpstorcommand.h"
 #include "sslserver.h"
 
 #include <QtCore/QFileInfo>
@@ -63,9 +63,9 @@ void FtpControlConnection::disconnectFromHost()
 
 void FtpControlConnection::acceptNewDataConnection()
 {
-    qDebug() << "Incoming data connection," << (asynchronousCommand ? "starting transfer" : "now waiting for command");
-    if (asynchronousCommand)
-        asynchronousCommand->start(dataConnectionServer->nextPendingConnection(), encryptDataConnection);
+    qDebug() << "Incoming data connection," << (ftpCommand ? "starting transfer" : "now waiting for command");
+    if (ftpCommand)
+        ftpCommand->start(dataConnectionServer->nextPendingConnection(), encryptDataConnection);
     else
         dataConnectionSocket = dataConnectionServer->nextPendingConnection();
     dataConnectionServer->close();
@@ -182,25 +182,25 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     lastProcessedCommand = entireCommand;
 }
 
-void FtpControlConnection::startOrScheduleCommand(AsynchronousCommand *asynchronousCommand)
+void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
 {
     if (!(dataConnectionServer->isListening() || dataConnectionSocket)) {
-        delete asynchronousCommand;
+        delete ftpCommand;
         reply(425);
         return;
     }
 
-    this->asynchronousCommand = asynchronousCommand;
-    connect(asynchronousCommand, SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
+    this->ftpCommand = ftpCommand;
+    connect(ftpCommand, SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
     if (dataConnectionSocket) {
-        asynchronousCommand->start(dataConnectionSocket, encryptDataConnection);
+        ftpCommand->start(dataConnectionSocket, encryptDataConnection);
         dataConnectionSocket = 0;
     }
 }
 
 void FtpControlConnection::pasv()
 {
-    delete asynchronousCommand;
+    delete ftpCommand;
     if (dataConnectionServer->isListening())
         dataConnectionServer->close();
     dataConnectionServer->listen();
@@ -210,17 +210,17 @@ void FtpControlConnection::pasv()
 
 void FtpControlConnection::list(const QString &dir, bool nameListOnly)
 {
-    startOrScheduleCommand(new AsynchronousListCommand(this, dir, nameListOnly));
+    startOrScheduleCommand(new FtpListCommand(this, dir, nameListOnly));
 }
 
 void FtpControlConnection::retr(const QString &fileName)
 {
-    startOrScheduleCommand(new AsynchronousRetrieveCommand(this, fileName, seekTo()));
+    startOrScheduleCommand(new FtpRetrCommand(this, fileName, seekTo()));
 }
 
 void FtpControlConnection::stor(const QString &fileName, bool appendMode)
 {
-    startOrScheduleCommand(new AsynchronousStoreCommand(this, fileName, appendMode, seekTo()));
+    startOrScheduleCommand(new FtpStorCommand(this, fileName, appendMode, seekTo()));
 }
 
 void FtpControlConnection::cwd(const QString &dir)
@@ -276,8 +276,8 @@ void FtpControlConnection::rnto(const QString &fileName)
 void FtpControlConnection::quit()
 {
     reply(221);
-    if (asynchronousCommand)
-        connect(asynchronousCommand.data(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
+    if (ftpCommand)
+        connect(ftpCommand.data(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
     else
         disconnectFromHost();
 }

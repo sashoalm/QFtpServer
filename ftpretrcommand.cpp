@@ -1,9 +1,9 @@
-#include "asynchronousretrievecommand.h"
+#include "ftpretrcommand.h"
 #include <QtCore/QFile>
 #include <QtNetwork/QTcpSocket>
 
-AsynchronousRetrieveCommand::AsynchronousRetrieveCommand(QObject *parent, const QString &fileName, qint64 seekTo) :
-    AsynchronousCommand(parent)
+FtpRetrCommand::FtpRetrCommand(QObject *parent, const QString &fileName, qint64 seekTo) :
+    FtpCommand(parent)
 {
     this->fileName = fileName;
     this->seekTo = seekTo;
@@ -11,7 +11,7 @@ AsynchronousRetrieveCommand::AsynchronousRetrieveCommand(QObject *parent, const 
     success = false;
 }
 
-AsynchronousRetrieveCommand::~AsynchronousRetrieveCommand()
+FtpRetrCommand::~FtpRetrCommand()
 {
     if (success)
         emit reply(226);
@@ -19,7 +19,7 @@ AsynchronousRetrieveCommand::~AsynchronousRetrieveCommand()
         emit reply(550);
 }
 
-void AsynchronousRetrieveCommand::startImplementation(QTcpSocket *socket)
+void FtpRetrCommand::startImplementation(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);
@@ -38,7 +38,7 @@ void AsynchronousRetrieveCommand::startImplementation(QTcpSocket *socket)
     refillSocketBuffer(128*1024);
 }
 
-void AsynchronousRetrieveCommand::refillSocketBuffer(qint64 bytes)
+void FtpRetrCommand::refillSocketBuffer(qint64 bytes)
 {
     if (!file->atEnd()) {
         socket->write(file->read(bytes));

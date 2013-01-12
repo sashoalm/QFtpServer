@@ -1,15 +1,15 @@
-#ifndef ASYNCHRONOUSCOMMAND_H
-#define ASYNCHRONOUSCOMMAND_H
+#ifndef FTPCOMMAND_H
+#define FTPCOMMAND_H
 
 #include <QObject>
 
 class QTcpSocket;
 
-class AsynchronousCommand : public QObject
+class FtpCommand : public QObject
 {
     Q_OBJECT
 public:
-    explicit AsynchronousCommand(QObject *parent = 0);
+    explicit FtpCommand(QObject *parent = 0);
 
 signals:
     void reply(int code, const QString &details = QString());
@@ -24,4 +24,4 @@ private slots:
     void encrypted();
 };
 
-#endif // ASYNCHRONOUSCOMMAND_H
+#endif // FTPCOMMAND_H

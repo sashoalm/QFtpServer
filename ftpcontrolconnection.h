@@ -6,7 +6,7 @@
 
 class QTcpServer;
 class QTcpSocket;
-class AsynchronousCommand;
+class FtpCommand;
 
 class FtpControlConnection : public QObject
 {
@@ -29,7 +29,7 @@ private:
     void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
     QString toLocalPath(const QString &fileName) const;
     void processCommand(const QString &entireCommand);
-    void startOrScheduleCommand(AsynchronousCommand *asynchronousCommand);
+    void startOrScheduleCommand(FtpCommand *ftpCommand);
     void pasv();
     void list(const QString &dir, bool nameListOnly = false);
     void retr(const QString &fileName);
@@ -55,7 +55,7 @@ private:
     QString password;
     QString rootPath;
     QTcpServer *dataConnectionServer;
-    QPointer<AsynchronousCommand> asynchronousCommand;
+    QPointer<FtpCommand> ftpCommand;
     QTcpSocket *dataConnectionSocket;
     bool encryptDataConnection;
 };

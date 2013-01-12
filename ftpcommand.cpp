@@ -1,20 +1,20 @@
-#include "asynchronouscommand.h"
+#include "ftpcommand.h"
 
 #include <QtNetwork/QSslSocket>
 
-AsynchronousCommand::AsynchronousCommand(QObject *parent) :
+FtpCommand::FtpCommand(QObject *parent) :
     QObject(parent)
 {
 }
 
 
-void AsynchronousCommand::encrypted()
+void FtpCommand::encrypted()
 {
     startImplementation((QTcpSocket *) sender());
 }
 
 
-void AsynchronousCommand::start(QTcpSocket *socket, bool encryptDataConnection)
+void FtpCommand::start(QTcpSocket *socket, bool encryptDataConnection)
 {
     if (encryptDataConnection) {
         QSslSocket *sslSocket = (QSslSocket *) socket;

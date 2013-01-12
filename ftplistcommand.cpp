@@ -1,23 +1,23 @@
-#include "asynchronouslistcommand.h"
+#include "ftplistcommand.h"
 
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 #include <QtCore/QDateTime>
 #include <QtNetwork/QTcpSocket>
 
-AsynchronousListCommand::AsynchronousListCommand(QObject *parent, const QString &fileName, bool nameListOnly) :
-    AsynchronousCommand(parent)
+FtpListCommand::FtpListCommand(QObject *parent, const QString &fileName, bool nameListOnly) :
+    FtpCommand(parent)
 {
     this->listDirectory = fileName;
     this->nameListOnly = nameListOnly;
 }
 
-AsynchronousListCommand::~AsynchronousListCommand()
+FtpListCommand::~FtpListCommand()
 {
     emit reply(226);
 }
 
-void AsynchronousListCommand::startImplementation(QTcpSocket *socket)
+void FtpListCommand::startImplementation(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);
