@@ -19,7 +19,7 @@ public:
 signals:
     
 private slots:
-    void acceptConnection();
+    void startNewControlConnection();
 
 private:
     QString userName;
