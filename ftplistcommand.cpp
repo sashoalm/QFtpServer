@@ -32,9 +32,12 @@ void FtpListCommand::startImplementation(QTcpSocket *socket)
     QString line;
     foreach (QFileInfo fi, QDir(listDirectory).entryInfoList()) {
         if (!nameListOnly) {
+            // directory/symlink/file
             if (fi.isSymLink()) line += 'l';
             else if (fi.isDir()) line += 'd';
             else line += '-';
+
+            // permissions
             QFile::Permissions p = fi.permissions();
             line += (p & QFile::ReadOwner) ? 'r' : '-';
             line += (p & QFile::WriteOwner) ? 'w' : '-';
@@ -45,12 +48,18 @@ void FtpListCommand::startImplementation(QTcpSocket *socket)
             line += (p & QFile::ReadOther) ? 'r' : '-';
             line += (p & QFile::WriteOther) ? 'w' : '-';
             line += (p & QFile::ExeOther) ? 'x' : '-';
-            // number of hard links, we say 1
-            line += " " + fi.owner() + ' ' + fi.group() + ' ' + QString::number(fi.size()) + ' ';
+
+            // owner/group
+            line += ' ' + fi.owner() + ' ' + fi.group();
+
+            // file size
+            line += ' ' + QString::number(fi.size());
+
+            // last modified
             QDateTime lm = fi.lastModified();
-            line += lm.date().toString("MMM d") + ' ' + lm.time().toString("hh:mm") + ' ';
+            line += ' ' + lm.date().toString("MMM d") + ' ' + lm.time().toString("hh:mm");
         }
-        line += fi.fileName();
+        line += ' ' + fi.fileName();
         line += "\r\n";
     }
 
