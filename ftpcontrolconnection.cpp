@@ -136,6 +136,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         quit();
     else if ("AUTH" == command && "TLS" == commandParameters)
         auth();
+    else if ("FEAT" == command)
+        feat();
     else if (isLoggedIn) {
         if ("PWD" == command)
             reply(227, '"' + currentDirectory + '"');
@@ -337,6 +339,15 @@ void FtpControlConnection::cdup()
 {
     currentDirectory = QFileInfo(currentDirectory).absolutePath();
     reply(250);
+}
+
+void FtpControlConnection::feat()
+{
+    socket->write(
+                "211-Features:\r\n"
+                "UTF8\r\n"
+                "211 End\r\n"
+                );
 }
 
 qint64 FtpControlConnection::seekTo()
