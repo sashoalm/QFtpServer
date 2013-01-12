@@ -35,7 +35,7 @@ void AsynchronousRetrieveCommand::startImplementation(QTcpSocket *socket)
     if (seekTo)
         file->seek(seekTo);
     connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
-    refillSocketBuffer(512*1024);
+    refillSocketBuffer(128*1024);
 }
 
 void AsynchronousRetrieveCommand::refillSocketBuffer(qint64 bytes)
