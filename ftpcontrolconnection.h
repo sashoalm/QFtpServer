@@ -51,6 +51,7 @@ private:
     void pass(const QString &password);
     void auth();
     void prot(const QString &protectionLevel);
+    void cdup();
     qint64 seekTo();
     QTcpSocket *socket;
     QString buffer;

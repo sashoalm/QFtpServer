@@ -173,6 +173,8 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
             reply(215, "UNIX");
         else if ("PROT" == command)
             prot(commandParameters);
+        else if ("CDUP" == command)
+            cdup();
         else
             reply(502);
     } else {
@@ -329,6 +331,12 @@ void FtpControlConnection::prot(const QString &protectionLevel)
         return;
     }
     reply(200);
+}
+
+void FtpControlConnection::cdup()
+{
+    currentDirectory = QFileInfo(currentDirectory).absolutePath();
+    reply(250);
 }
 
 qint64 FtpControlConnection::seekTo()
