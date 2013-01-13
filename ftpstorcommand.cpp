@@ -18,10 +18,6 @@ FtpStorCommand::~FtpStorCommand()
 
 void FtpStorCommand::startImplementation(QTcpSocket *socket)
 {
-    this->socket = socket;
-    socket->setParent(this);
-    connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
-
     file = new QFile(fileName, this);
     if (!file->open(appendMode ? QIODevice::Append : QIODevice::WriteOnly)) {
         emit reply(451);

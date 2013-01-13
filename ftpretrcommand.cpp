@@ -21,10 +21,6 @@ FtpRetrCommand::~FtpRetrCommand()
 
 void FtpRetrCommand::startImplementation(QTcpSocket *socket)
 {
-    this->socket = socket;
-    socket->setParent(this);
-    connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
-
     file = new QFile(fileName, this);
     if (!file->open(QIODevice::ReadOnly)) {
         emit reply(550);

@@ -22,6 +22,7 @@ public:
 
 protected:
     virtual void startImplementation(QTcpSocket *socket) = 0;
+    QTcpSocket* socket;
 
 private slots:
     void encrypted();

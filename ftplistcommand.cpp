@@ -19,10 +19,6 @@ FtpListCommand::~FtpListCommand()
 
 void FtpListCommand::startImplementation(QTcpSocket *socket)
 {
-    this->socket = socket;
-    socket->setParent(this);
-    connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
-
     emit reply(150);
 
     // this is how the returned list looks

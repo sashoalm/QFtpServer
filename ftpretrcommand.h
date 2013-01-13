@@ -21,7 +21,6 @@ private slots:
 private:
     void startImplementation(QTcpSocket *socket);
 
-    QTcpSocket* socket;
     QString fileName;
     QFile *file;
     qint64 seekTo;

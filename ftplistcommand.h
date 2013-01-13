@@ -18,7 +18,6 @@ private:
     void startImplementation(QTcpSocket *socket);
 
 private:
-    QTcpSocket* socket;
     QString listDirectory;
     bool nameListOnly;
 };
