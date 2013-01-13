@@ -66,8 +66,10 @@ void FtpControlConnection::acceptNewDataConnection()
     qDebug() << "Incoming data connection," << (ftpCommand ? "starting transfer" : "now waiting for command");
     if (ftpCommand)
         ftpCommand->start(dataConnectionServer->nextPendingConnection(), encryptDataConnection);
-    else
+    else {
         dataConnectionSocket = dataConnectionServer->nextPendingConnection();
+        dataConnectionSocket->setParent(this);
+    }
     dataConnectionServer->close();
 }
 
