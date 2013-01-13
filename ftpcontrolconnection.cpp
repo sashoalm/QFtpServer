@@ -179,6 +179,10 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
             prot(commandParameters);
         else if ("CDUP" == command)
             cdup();
+        else if ("OPTS" == command && "UTF8 ON" == commandParameters)
+            reply(200);
+        else if ("PBSZ" == command && "0" == commandParameters)
+            reply(200);
         else
             reply(502);
     } else {
