@@ -136,7 +136,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         pass(commandParameters);
     else if ("QUIT" == command)
         quit();
-    else if ("AUTH" == command && "TLS" == commandParameters)
+    else if ("AUTH" == command && "TLS" == commandParameters.toUpper())
         auth();
     else if ("FEAT" == command)
         feat();
@@ -176,12 +176,14 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         else if ("SYST" == command)
             reply(215, "UNIX");
         else if ("PROT" == command)
-            prot(commandParameters);
+            prot(commandParameters.toUpper());
         else if ("CDUP" == command)
             cdup();
-        else if ("OPTS" == command && "UTF8 ON" == commandParameters)
+        else if ("OPTS" == command && "UTF8 ON" == commandParameters.toUpper())
             reply(200);
-        else if ("PBSZ" == command && "0" == commandParameters)
+        else if ("PBSZ" == command && "0" == commandParameters.toUpper())
+            reply(200);
+        else if ("NOOP" == command)
             reply(200);
         else
             reply(502);
