@@ -25,8 +25,8 @@ void FtpListCommand::startImplementation(QTcpSocket *socket)
     // it is like what is returned by 'ls -l'
     // drwxr-xr-x    9 ftp      ftp          4096 Nov 17  2009 pub
 
-    QString line;
     foreach (QFileInfo fi, QDir(listDirectory).entryInfoList()) {
+        QString line;
         if (!nameListOnly) {
             // directory/symlink/file
             if (fi.isSymLink()) line += 'l';
@@ -57,8 +57,9 @@ void FtpListCommand::startImplementation(QTcpSocket *socket)
         }
         line += ' ' + fi.fileName();
         line += "\r\n";
+
+        socket->write(line.toUtf8());
     }
 
-    socket->write(line.toUtf8());
     socket->disconnectFromHost();
 }
