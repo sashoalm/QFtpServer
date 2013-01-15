@@ -55,7 +55,6 @@ private:
     void feat();
     qint64 seekTo();
     QTcpSocket *socket;
-    QString buffer;
     QString currentDirectory;
     QString lastProcessedCommand;
     bool isLoggedIn;

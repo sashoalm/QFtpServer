@@ -11,6 +11,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QEventLoop>
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 #include <QtNetwork/QSslSocket>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &rootPath, const QString &userName, const QString &password) :
@@ -38,22 +39,10 @@ FtpControlConnection::~FtpControlConnection()
 
 void FtpControlConnection::acceptNewData()
 {
-    buffer += QString::fromUtf8(socket->readAll()).replace("\r\n", "\n").replace('\r', '\n');
-
-    // get the list of complete commands
-    bool hasCompleteLine = buffer.endsWith("\n");
-    QStringList list = buffer.split("\n", QString::SkipEmptyParts);
-    if (!hasCompleteLine) {
-        buffer = list.last();
-        list.removeLast();
-    } else {
-        buffer.clear();
-    }
-
-    // process them
-    foreach (const QString &line, list) {
-        processCommand(line);
-    }
+    if (!socket->canReadLine())
+        return;
+    processCommand(QString::fromUtf8(socket->readLine()).trimmed());
+    QTimer::singleShot(0, this, SLOT(acceptNewData()));
 }
 
 void FtpControlConnection::disconnectFromHost()
