@@ -46,7 +46,13 @@ void FtpListCommand::startImplementation(QTcpSocket *socket)
             line += (p & QFile::ExeOther) ? 'x' : '-';
 
             // owner/group
-            line += ' ' + fi.owner() + ' ' + fi.group();
+            QString owner = fi.owner();
+            if (owner.isEmpty())
+                owner = "unknown";
+            QString group = fi.group();
+            if (group.isEmpty())
+                group = "unknown";
+            line += ' ' + owner + ' ' + group;
 
             // file size
             line += ' ' + QString::number(fi.size());
