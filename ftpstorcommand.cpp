@@ -16,7 +16,7 @@ FtpStorCommand::~FtpStorCommand()
     emit reply(226);
 }
 
-void FtpStorCommand::startImplementation(QTcpSocket *socket)
+void FtpStorCommand::startImplementation()
 {
     file = new QFile(fileName, this);
     if (!file->open(appendMode ? QIODevice::Append : QIODevice::WriteOnly)) {

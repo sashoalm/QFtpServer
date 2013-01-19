@@ -3,6 +3,10 @@
 
 #include "ftpcommand.h"
 
+class QTimer;
+class QFileInfo;
+typedef QList<QFileInfo> QFileInfoList;
+
 // the ftp list command
 // prints out a listing of the given directory
 // in the same format as the unix 'ls -l' command
@@ -15,11 +19,18 @@ public:
     ~FtpListCommand();
 
 private:
-    void startImplementation(QTcpSocket *socket);
+    void startImplementation();
+    QString fileListingString(const QFileInfo &fi);
+
+private slots:
+    void listNextBatch();
 
 private:
     QString listDirectory;
     bool nameListOnly;
+    QTimer *timer;
+    QFileInfoList *list;
+    int index;
 };
 
 #endif // FTPLISTCOMMAND_H

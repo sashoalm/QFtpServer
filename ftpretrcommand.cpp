@@ -19,7 +19,7 @@ FtpRetrCommand::~FtpRetrCommand()
         emit reply(550);
 }
 
-void FtpRetrCommand::startImplementation(QTcpSocket *socket)
+void FtpRetrCommand::startImplementation()
 {
     file = new QFile(fileName, this);
     if (!file->open(QIODevice::ReadOnly)) {

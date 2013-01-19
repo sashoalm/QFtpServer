@@ -21,7 +21,7 @@ public:
     void start(QTcpSocket *socket, bool encryptDataConnection);
 
 protected:
-    virtual void startImplementation(QTcpSocket *socket) = 0;
+    virtual void startImplementation() = 0;
     QTcpSocket* socket;
 
 private slots:
