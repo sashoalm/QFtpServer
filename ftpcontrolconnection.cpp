@@ -120,7 +120,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     splitCommand(entireCommand, command, commandParameters);
 
     if ("USER" == command)
-        user(commandParameters);
+        reply(331);
     else if ("PASS" == command)
         pass(commandParameters);
     else if ("QUIT" == command)
@@ -290,14 +290,6 @@ void FtpControlConnection::size(const QString &fileName)
         reply(550);
     else
         reply(213, QString("%1").arg(fi.size()));
-}
-
-void FtpControlConnection::user(const QString &userName)
-{
-    if (this->userName.isEmpty() || userName == this->userName)
-        reply(331);
-    else
-        reply(530);
 }
 
 void FtpControlConnection::pass(const QString &password)

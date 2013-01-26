@@ -47,7 +47,6 @@ private:
     void rnto(const QString &fileName);
     void quit();
     void size(const QString &fileName);
-    void user(const QString &userName);
     void pass(const QString &password);
     void auth();
     void prot(const QString &protectionLevel);
