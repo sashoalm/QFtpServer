@@ -38,7 +38,7 @@ private:
     void loadSettings();
     void saveSettings();
     void startServer();
-    void displayLanIpAddress();
+    QString lanIp();
 };
 
 #endif // MAINWINDOW_H

@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
     loadSettings();
     server = 0;
     startServer();
-    displayLanIpAddress();
 }
 
 MainWindow::~MainWindow()
@@ -110,17 +109,18 @@ void MainWindow::startServer()
     }
     server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName, password);
     if (server->isListening())
-        ui->labelStatus->setText("Listening...");
+        ui->labelStatus->setText("Listening at " + lanIp());
     else
         ui->labelStatus->setText("Not listening...");
 }
 
-void MainWindow::displayLanIpAddress()
+QString MainWindow::lanIp()
 {
     foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
         if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
-             ui->labelLanIp->setText(address.toString());
+            return address.toString();
     }
+    return "";
 }
 
 void MainWindow::on_pushButtonRestartServer_clicked()
