@@ -109,9 +109,9 @@ void MainWindow::startServer()
     }
     server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName, password);
     if (server->isListening())
-        ui->labelStatus->setText("Listening at " + lanIp());
+        ui->statusBar->showMessage("Listening at " + lanIp());
     else
-        ui->labelStatus->setText("Not listening...");
+        ui->statusBar->showMessage("Not listening");
 }
 
 QString MainWindow::lanIp()
