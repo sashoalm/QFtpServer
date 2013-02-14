@@ -286,7 +286,7 @@ void FtpControlConnection::quit()
 void FtpControlConnection::size(const QString &fileName)
 {
     QFileInfo fi(fileName);
-    if (fi.isDir())
+    if (!fi.exists() || fi.isDir())
         reply(550);
     else
         reply(213, QString("%1").arg(fi.size()));
