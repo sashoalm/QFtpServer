@@ -8,12 +8,11 @@ FtpRetrCommand::FtpRetrCommand(QObject *parent, const QString &fileName, qint64 
     this->fileName = fileName;
     this->seekTo = seekTo;
     file = 0;
-    success = false;
 }
 
 FtpRetrCommand::~FtpRetrCommand()
 {
-    if (success)
+    if (file && file->atEnd())
         emit reply(226);
     else
         emit reply(550);
@@ -23,7 +22,6 @@ void FtpRetrCommand::startImplementation()
 {
     file = new QFile(fileName, this);
     if (!file->open(QIODevice::ReadOnly)) {
-        emit reply(550);
         deleteLater();
         return;
     }
@@ -36,10 +34,8 @@ void FtpRetrCommand::startImplementation()
 
 void FtpRetrCommand::refillSocketBuffer(qint64 bytes)
 {
-    if (!file->atEnd()) {
+    if (!file->atEnd())
         socket->write(file->read(bytes));
-    } else {
+    else
         socket->disconnectFromHost();
-        success = true;
-    }
 }

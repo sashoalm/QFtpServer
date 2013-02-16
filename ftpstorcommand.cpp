@@ -9,21 +9,25 @@ FtpStorCommand::FtpStorCommand(QObject *parent, const QString &fileName, bool ap
     this->appendMode = appendMode;
     file = 0;
     this->seekTo = seekTo;
+    success = false;
 }
 
 FtpStorCommand::~FtpStorCommand()
 {
-    emit reply(226);
+    if (success)
+        emit reply(226);
+    else
+        emit reply(451);
 }
 
 void FtpStorCommand::startImplementation()
 {
     file = new QFile(fileName, this);
     if (!file->open(appendMode ? QIODevice::Append : QIODevice::WriteOnly)) {
-        emit reply(451);
         deleteLater();
         return;
     }
+    success = true;
     emit reply(150);
     if (seekTo)
         file->seek(seekTo);

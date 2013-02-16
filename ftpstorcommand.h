@@ -25,6 +25,7 @@ private:
     QFile *file;
     bool appendMode;
     qint64 seekTo;
+    bool success;
 };
 
 #endif // FTPSTORCOMMAND_H
