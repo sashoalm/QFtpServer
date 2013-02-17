@@ -12,7 +12,7 @@ FtpRetrCommand::FtpRetrCommand(QObject *parent, const QString &fileName, qint64 
 
 FtpRetrCommand::~FtpRetrCommand()
 {
-    if (file && file->atEnd())
+    if (file && file->isOpen() && file->atEnd())
         emit reply(226);
     else
         emit reply(550);
