@@ -100,13 +100,13 @@ void MainWindow::saveSettings()
 
 void MainWindow::startServer()
 {
-    delete server;
     QString userName;
     QString password;
     if (!ui->checkBoxAnonymous->isChecked()) {
         userName = ui->lineEditUserName->text();
         password = ui->lineEditPassword->text();
     }
+    delete server;
     server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName, password);
     if (server->isListening())
         ui->statusBar->showMessage("Listening at " + lanIp());
