@@ -30,6 +30,7 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, 
     dataConnectionServer = new SslServer(this);
     connect(dataConnectionServer, SIGNAL(newConnection()), this, SLOT(acceptNewDataConnection()));
     dataConnectionSocket = 0;
+    isReadyDataConnectionSocket = false;
     reply(220);
 }
 
@@ -53,13 +54,32 @@ void FtpControlConnection::disconnectFromHost()
 void FtpControlConnection::acceptNewDataConnection()
 {
     qDebug() << "Incoming data connection," << (ftpCommand ? "starting transfer" : "now waiting for command");
-    if (ftpCommand)
-        ftpCommand->start(dataConnectionServer->nextPendingConnection(), encryptDataConnection);
-    else {
-        dataConnectionSocket = dataConnectionServer->nextPendingConnection();
-        dataConnectionSocket->setParent(this);
-    }
+    QSslSocket *sslSocket = (QSslSocket *) dataConnectionServer->nextPendingConnection();
+    sslSocket->setParent(this);
     dataConnectionServer->close();
+    dataConnectionSocket = sslSocket;
+    if (encryptDataConnection) {
+        connect(sslSocket, SIGNAL(encrypted()), this, SLOT(dataConnectionReady()));
+        sslSocket->startServerEncryption();
+    } else {
+        dataConnectionReady();
+    }
+}
+
+void FtpControlConnection::startFtpCommand()
+{
+    if (!ftpCommand || !isReadyDataConnectionSocket)
+        return;
+
+    ftpCommand->start(dataConnectionSocket);
+    dataConnectionSocket = 0;
+    isReadyDataConnectionSocket = false;
+}
+
+void FtpControlConnection::dataConnectionReady()
+{
+    isReadyDataConnectionSocket = true;
+    startFtpCommand();
 }
 
 void FtpControlConnection::splitCommand(const QString &entireCommand, QString &command, QString &commandParameters)
@@ -185,7 +205,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
 
 void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
 {
-    if (!(dataConnectionServer->isListening() || dataConnectionSocket)) {
+    if (!dataConnectionServer->isListening() && !dataConnectionSocket) {
         delete ftpCommand;
         reply(425);
         return;
@@ -193,17 +213,16 @@ void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
 
     this->ftpCommand = ftpCommand;
     connect(ftpCommand, SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
-    if (dataConnectionSocket) {
-        ftpCommand->start(dataConnectionSocket, encryptDataConnection);
-        dataConnectionSocket = 0;
-    }
+    startFtpCommand();
 }
 
 void FtpControlConnection::pasv()
 {
     delete ftpCommand;
-    if (dataConnectionServer->isListening())
-        dataConnectionServer->close();
+    delete dataConnectionSocket;
+    dataConnectionSocket = 0;
+    isReadyDataConnectionSocket = false;
+    dataConnectionServer->close();
     dataConnectionServer->listen();
     int port = dataConnectionServer->serverPort();
     reply(227, QString("comment %1,%2,%3").arg(socket->localAddress().toString().replace('.',',')).arg(port/256).arg(port%256));

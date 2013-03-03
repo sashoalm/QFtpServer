@@ -7,23 +7,10 @@ FtpCommand::FtpCommand(QObject *parent) :
 {
 }
 
-
-void FtpCommand::encrypted()
-{
-    startImplementation();
-}
-
-
-void FtpCommand::start(QTcpSocket *socket, bool encryptDataConnection)
+void FtpCommand::start(QTcpSocket *socket)
 {
     this->socket = socket;
     socket->setParent(this);
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
-    if (encryptDataConnection) {
-        QSslSocket *sslSocket = (QSslSocket *) socket;
-        connect(sslSocket, SIGNAL(encrypted()), this, SLOT(encrypted()));
-        sslSocket->startServerEncryption();
-    } else {
-        startImplementation();
-    }
+    startImplementation();
 }

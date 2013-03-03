@@ -18,14 +18,11 @@ signals:
     void reply(int code, const QString &details = QString());
 
 public:
-    void start(QTcpSocket *socket, bool encryptDataConnection);
+    void start(QTcpSocket *socket);
 
 protected:
     virtual void startImplementation() = 0;
     QTcpSocket* socket;
-
-private slots:
-    void encrypted();
 };
 
 #endif // FTPCOMMAND_H

@@ -30,6 +30,8 @@ private slots:
     void acceptNewData();
     void disconnectFromHost();
     void acceptNewDataConnection();
+    void startFtpCommand();
+    void dataConnectionReady();
 
 private:
     void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
@@ -64,6 +66,7 @@ private:
     QPointer<FtpCommand> ftpCommand;
     QTcpSocket *dataConnectionSocket;
     bool encryptDataConnection;
+    bool isReadyDataConnectionSocket;
 };
 
 #endif // FTPCONTROLCONNECTION_H
