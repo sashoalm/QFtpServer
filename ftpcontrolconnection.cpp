@@ -286,6 +286,7 @@ void FtpControlConnection::auth()
 {
     reply(234);
     QSslSocket *sslSocket = (QSslSocket*) socket;
+    SslServer::setLocalCertificateAndPrivateKey(sslSocket);
     sslSocket->startServerEncryption();
 }
 

@@ -51,6 +51,7 @@ void PassiveDataConnection::newConnection()
     server->close();
     if (encrypt) {
         connect(socket, SIGNAL(encrypted()), this, SLOT(encrypted()));
+        SslServer::setLocalCertificateAndPrivateKey(socket);
         socket->startServerEncryption();
     }
     else
