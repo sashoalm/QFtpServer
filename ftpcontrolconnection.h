@@ -7,6 +7,7 @@
 class QTcpServer;
 class QTcpSocket;
 class FtpCommand;
+class PassiveDataConnection;
 
 // implements the ftp control connection
 // reads the ftp commands from the control connection socket
@@ -29,9 +30,6 @@ public slots:
 private slots:
     void acceptNewData();
     void disconnectFromHost();
-    void acceptNewDataConnection();
-    void startFtpCommand();
-    void dataConnectionReady();
 
 private:
     void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
@@ -62,11 +60,8 @@ private:
     QString userName;
     QString password;
     QString rootPath;
-    QTcpServer *dataConnectionServer;
-    QPointer<FtpCommand> ftpCommand;
-    QTcpSocket *dataConnectionSocket;
     bool encryptDataConnection;
-    bool isReadyDataConnectionSocket;
+    PassiveDataConnection *dataConnection;
 };
 
 #endif // FTPCONTROLCONNECTION_H

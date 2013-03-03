@@ -29,7 +29,8 @@ SOURCES += main.cpp mainwindow.cpp \
     ftpstorcommand.cpp \
     ftpretrcommand.cpp \
     ftplistcommand.cpp \
-    ftpcommand.cpp
+    ftpcommand.cpp \
+    passivedataconnection.cpp
 HEADERS += mainwindow.h \
     ftpserver.h \
     ftpcontrolconnection.h \
@@ -37,7 +38,8 @@ HEADERS += mainwindow.h \
     ftpstorcommand.h \
     ftpretrcommand.h \
     ftplistcommand.h \
-    ftpcommand.h
+    ftpcommand.h \
+    passivedataconnection.h
 FORMS += mainwindow.ui
 QT += network
 

@@ -3,6 +3,7 @@
 #include "ftpretrcommand.h"
 #include "ftpstorcommand.h"
 #include "sslserver.h"
+#include "passivedataconnection.h"
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QDateTime>
@@ -27,10 +28,7 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, 
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
     currentDirectory = "/";
-    dataConnectionServer = new SslServer(this);
-    connect(dataConnectionServer, SIGNAL(newConnection()), this, SLOT(acceptNewDataConnection()));
-    dataConnectionSocket = 0;
-    isReadyDataConnectionSocket = false;
+    dataConnection = new PassiveDataConnection(this);
     reply(220);
 }
 
@@ -49,37 +47,6 @@ void FtpControlConnection::acceptNewData()
 void FtpControlConnection::disconnectFromHost()
 {
     socket->disconnectFromHost();
-}
-
-void FtpControlConnection::acceptNewDataConnection()
-{
-    qDebug() << "Incoming data connection," << (ftpCommand ? "starting transfer" : "now waiting for command");
-    QSslSocket *sslSocket = (QSslSocket *) dataConnectionServer->nextPendingConnection();
-    sslSocket->setParent(this);
-    dataConnectionServer->close();
-    dataConnectionSocket = sslSocket;
-    if (encryptDataConnection) {
-        connect(sslSocket, SIGNAL(encrypted()), this, SLOT(dataConnectionReady()));
-        sslSocket->startServerEncryption();
-    } else {
-        dataConnectionReady();
-    }
-}
-
-void FtpControlConnection::startFtpCommand()
-{
-    if (!ftpCommand || !isReadyDataConnectionSocket)
-        return;
-
-    ftpCommand->start(dataConnectionSocket);
-    dataConnectionSocket = 0;
-    isReadyDataConnectionSocket = false;
-}
-
-void FtpControlConnection::dataConnectionReady()
-{
-    isReadyDataConnectionSocket = true;
-    startFtpCommand();
 }
 
 void FtpControlConnection::splitCommand(const QString &entireCommand, QString &command, QString &commandParameters)
@@ -205,26 +172,18 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
 
 void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
 {
-    if (!dataConnectionServer->isListening() && !dataConnectionSocket) {
+    connect(ftpCommand, SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
+
+    if (!dataConnection->setFtpCommand(ftpCommand)) {
         delete ftpCommand;
         reply(425);
         return;
     }
-
-    this->ftpCommand = ftpCommand;
-    connect(ftpCommand, SIGNAL(reply(int,QString)), this, SLOT(reply(int,QString)));
-    startFtpCommand();
 }
 
 void FtpControlConnection::pasv()
 {
-    delete ftpCommand;
-    delete dataConnectionSocket;
-    dataConnectionSocket = 0;
-    isReadyDataConnectionSocket = false;
-    dataConnectionServer->close();
-    dataConnectionServer->listen();
-    int port = dataConnectionServer->serverPort();
+    int port = dataConnection->listen(encryptDataConnection);
     reply(227, QString("comment %1,%2,%3").arg(socket->localAddress().toString().replace('.',',')).arg(port/256).arg(port%256));
 }
 
@@ -296,8 +255,8 @@ void FtpControlConnection::rnto(const QString &fileName)
 void FtpControlConnection::quit()
 {
     reply(221);
-    if (ftpCommand)
-        connect(ftpCommand.data(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
+    if (dataConnection->ftpCommand())
+        connect(dataConnection->ftpCommand(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
     else
         disconnectFromHost();
 }
