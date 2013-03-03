@@ -5,8 +5,8 @@
 
 class QFile;
 
-// the ftp stor command
-// used to upload files to the ftp server
+// Implements the STOR and APPE commands. Used to upload files to the ftp
+// server.
 
 class FtpStorCommand : public FtpCommand
 {

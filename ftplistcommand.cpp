@@ -22,10 +22,11 @@ void FtpListCommand::startImplementation()
 {
     emit reply(150);
 
-    // start the timer
     index = 0;
     list = new QFileInfoList;
     *list = QDir(listDirectory).entryInfoList();
+
+    // Start the timer.
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(listNextBatch()));
     timer->start(0);
@@ -33,18 +34,18 @@ void FtpListCommand::startImplementation()
 
 QString FtpListCommand::fileListingString(const QFileInfo &fi)
 {
-    // this is how the returned list looks
-    // it is like what is returned by 'ls -l'
+    // This is how the returned list looks. It is like what is returned by
+    // 'ls -l':
     // drwxr-xr-x    9 ftp      ftp          4096 Nov 17  2009 pub
 
     QString line;
     if (!nameListOnly) {
-        // directory/symlink/file
+        // Directory/symlink/file.
         if (fi.isSymLink()) line += 'l';
         else if (fi.isDir()) line += 'd';
         else line += '-';
 
-        // permissions
+        // Permissions.
         QFile::Permissions p = fi.permissions();
         line += (p & QFile::ReadOwner) ? 'r' : '-';
         line += (p & QFile::WriteOwner) ? 'w' : '-';
@@ -56,7 +57,7 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
         line += (p & QFile::WriteOther) ? 'w' : '-';
         line += (p & QFile::ExeOther) ? 'x' : '-';
 
-        // owner/group
+        // Owner/group.
         QString owner = fi.owner();
         if (owner.isEmpty())
             owner = "unknown";
@@ -65,10 +66,10 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
             group = "unknown";
         line += ' ' + owner + ' ' + group;
 
-        // file size
+        // File size.
         line += ' ' + QString::number(fi.size());
 
-        // last modified
+        // Last modified.
         QDateTime lm = fi.lastModified();
         line += ' ' + lm.date().toString("MMM d") + ' ' + lm.time().toString("hh:mm");
     }
@@ -79,7 +80,7 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
 
 void FtpListCommand::listNextBatch()
 {
-    // list next 10 items
+    // List next 10 items.
     int stop = qMin(index + 10, list->size());
     while (index < stop) {
         QString line = fileListingString(list->at(index));
@@ -87,7 +88,7 @@ void FtpListCommand::listNextBatch()
         index++;
     }
 
-    // if all files have been listed finish
+    // If all files have been listed, then finish.
     if (list->size() == stop) {
         delete list;
         timer->stop();

@@ -5,8 +5,7 @@
 
 class QTcpSocket;
 
-// the base class for all FTP commands
-// that need a data connection
+// The base class for all FTP commands that need a data connection.
 
 class FtpCommand : public QObject
 {

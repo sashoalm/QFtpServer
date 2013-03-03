@@ -51,7 +51,7 @@ void FtpControlConnection::disconnectFromHost()
 
 void FtpControlConnection::splitCommand(const QString &entireCommand, QString &command, QString &commandParameters)
 {
-    // split parameters and command
+    // Split parameters and command.
     int pos = entireCommand.indexOf(' ');
     if (-1 != pos) {
         command = entireCommand.left(pos).trimmed().toUpper();

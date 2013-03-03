@@ -35,19 +35,19 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    // this is the FTP server object
+    // This is the FTP server object.
     FtpServer *server;
 
-    // load the stored settings
+    // Load the stored settings.
     void loadSettings();
 
-    // save/store the current settings
+    // Save the current settings.
     void saveSettings();
 
-    // (re)start the FTP server
+    // Restart the FTP server.
     void startServer();
 
-    // get the LAN IP of the host, e.g. "192.168.1.10"
+    // Get the LAN IP of the host, e.g. "192.168.1.10".
     QString lanIp();
 };
 
