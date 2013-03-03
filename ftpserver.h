@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class QTcpServer;
+class SslServer;
 
 // The ftp server. Listens on a port, and starts a new control connection each
 // time it gets connected.
@@ -24,7 +24,7 @@ private:
     QString userName;
     QString password;
     QString rootPath;
-    QTcpServer *server;
+    SslServer *server;
 };
 
 #endif // FTPSERVER_H

@@ -5,7 +5,7 @@
 #include <QtCore/QPointer>
 
 class QTcpServer;
-class QTcpSocket;
+class QSslSocket;
 class FtpCommand;
 class PassiveDataConnection;
 
@@ -18,7 +18,7 @@ class FtpControlConnection : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &rootPath, const QString &userName = QString(), const QString &password = QString());
+    explicit FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName = QString(), const QString &password = QString());
     ~FtpControlConnection();
     
 signals:
@@ -52,7 +52,7 @@ private:
     void cdup();
     void feat();
     qint64 seekTo();
-    QTcpSocket *socket;
+    QSslSocket *socket;
     QString currentDirectory;
     QString lastProcessedCommand;
     bool isLoggedIn;

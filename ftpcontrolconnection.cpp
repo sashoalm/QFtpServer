@@ -15,7 +15,7 @@
 #include <QtCore/QTimer>
 #include <QtNetwork/QSslSocket>
 
-FtpControlConnection::FtpControlConnection(QObject *parent, QTcpSocket *socket, const QString &rootPath, const QString &userName, const QString &password) :
+FtpControlConnection::FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName, const QString &password) :
     QObject(parent)
 {
     this->socket = socket;
@@ -285,9 +285,8 @@ void FtpControlConnection::pass(const QString &password)
 void FtpControlConnection::auth()
 {
     reply(234);
-    QSslSocket *sslSocket = (QSslSocket*) socket;
-    SslServer::setLocalCertificateAndPrivateKey(sslSocket);
-    sslSocket->startServerEncryption();
+    SslServer::setLocalCertificateAndPrivateKey(socket);
+    socket->startServerEncryption();
 }
 
 void FtpControlConnection::prot(const QString &protectionLevel)

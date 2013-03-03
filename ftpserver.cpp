@@ -3,7 +3,6 @@
 #include "sslserver.h"
 
 #include <QtCore/QDebug>
-#include <QtNetwork/QTcpServer>
 
 FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const QString &userName, const QString &password) :
     QObject(parent)
@@ -24,5 +23,5 @@ bool FtpServer::isListening()
 void FtpServer::startNewControlConnection()
 {
     qDebug() << "FtpServer::acceptConnection";
-    new FtpControlConnection(this, server->nextPendingConnection(), rootPath, userName, password);
+    new FtpControlConnection(this, (QSslSocket *) server->nextPendingConnection(), rootPath, userName, password);
 }
