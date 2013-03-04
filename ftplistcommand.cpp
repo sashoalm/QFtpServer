@@ -15,7 +15,8 @@ FtpListCommand::FtpListCommand(QObject *parent, const QString &fileName, bool na
 
 FtpListCommand::~FtpListCommand()
 {
-    emit reply(226);
+    if (started)
+        emit reply(226);
 }
 
 void FtpListCommand::startImplementation()

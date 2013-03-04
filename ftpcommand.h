@@ -22,6 +22,7 @@ public:
 protected:
     virtual void startImplementation() = 0;
     QTcpSocket* socket;
+    bool started;
 };
 
 #endif // FTPCOMMAND_H

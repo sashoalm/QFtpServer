@@ -14,10 +14,12 @@ FtpStorCommand::FtpStorCommand(QObject *parent, const QString &fileName, bool ap
 
 FtpStorCommand::~FtpStorCommand()
 {
-    if (success)
-        emit reply(226);
-    else
-        emit reply(451);
+    if (started) {
+        if (success)
+            emit reply(226);
+        else
+            emit reply(451);
+    }
 }
 
 void FtpStorCommand::startImplementation()
