@@ -32,6 +32,8 @@ private slots:
 
     void on_toolButtonBrowse_clicked();
 
+    void onPeerIpChanged(const QString &peerIp);
+
 private:
     Ui::MainWindow *ui;
 

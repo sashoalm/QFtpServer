@@ -16,6 +16,7 @@ public:
     bool isListening();
 
 signals:
+    void newPeerIp(const QString &ip);
     
 private slots:
     void startNewControlConnection();
@@ -25,6 +26,7 @@ private:
     QString password;
     QString rootPath;
     SslServer *server;
+    QString previousPeerIp;
 };
 
 #endif // FTPSERVER_H

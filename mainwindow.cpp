@@ -108,6 +108,7 @@ void MainWindow::startServer()
     }
     delete server;
     server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName, password);
+    connect(server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
     if (server->isListening())
         ui->statusBar->showMessage("Listening at " + lanIp());
     else
@@ -134,4 +135,9 @@ void MainWindow::on_toolButtonBrowse_clicked()
     if (rootPath.isEmpty())
         return;
     ui->lineEditRootPath->setText(rootPath);
+}
+
+void MainWindow::onPeerIpChanged(const QString &peerIp)
+{
+    ui->statusBar->showMessage("Connected to " + peerIp);
 }
