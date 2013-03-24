@@ -34,6 +34,8 @@ private slots:
 
     void onPeerIpChanged(const QString &peerIp);
 
+    void on_pushButtonShowDebugLog_clicked();
+
 private:
     Ui::MainWindow *ui;
 

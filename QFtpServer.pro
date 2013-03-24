@@ -30,7 +30,8 @@ SOURCES += main.cpp mainwindow.cpp \
     ftpretrcommand.cpp \
     ftplistcommand.cpp \
     ftpcommand.cpp \
-    passivedataconnection.cpp
+    passivedataconnection.cpp \
+    debuglogdialog.cpp
 HEADERS += mainwindow.h \
     ftpserver.h \
     ftpcontrolconnection.h \
@@ -39,16 +40,11 @@ HEADERS += mainwindow.h \
     ftpretrcommand.h \
     ftplistcommand.h \
     ftpcommand.h \
-    passivedataconnection.h
-FORMS += mainwindow.ui
+    passivedataconnection.h \
+    debuglogdialog.h
+FORMS += mainwindow.ui \
+    debuglogdialog.ui
 QT += network
-
-CONFIG(release, debug|release) {
-    #This is a release build
-    DEFINES += QT_NO_DEBUG_OUTPUT
-} else {
-    #This is a debug build
-}
 
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)

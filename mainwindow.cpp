@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "ftpserver.h"
+#include "debuglogdialog.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QSettings>
@@ -140,4 +141,12 @@ void MainWindow::on_toolButtonBrowse_clicked()
 void MainWindow::onPeerIpChanged(const QString &peerIp)
 {
     ui->statusBar->showMessage("Connected to " + peerIp);
+}
+
+void MainWindow::on_pushButtonShowDebugLog_clicked()
+{
+    DebugLogDialog *dlg = new DebugLogDialog;
+    dlg->setAttribute( Qt::WA_DeleteOnClose, true );
+    dlg->setModal(true);
+    dlg->showExpanded();
 }
