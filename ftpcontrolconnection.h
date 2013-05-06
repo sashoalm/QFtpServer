@@ -18,7 +18,7 @@ class FtpControlConnection : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName = QString(), const QString &password = QString());
+    explicit FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName = QString(), const QString &password = QString(), bool readOnly = false);
     ~FtpControlConnection();
     
 signals:
@@ -61,6 +61,7 @@ private:
     QString rootPath;
     bool encryptDataConnection;
     PassiveDataConnection *dataConnection;
+    bool readOnly;
 };
 
 #endif // FTPCONTROLCONNECTION_H

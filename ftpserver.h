@@ -12,7 +12,7 @@ class FtpServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpServer(QObject *parent, const QString &rootPath, int port = 21, const QString &userName = QString(), const QString &password = QString());
+    explicit FtpServer(QObject *parent, const QString &rootPath, int port = 21, const QString &userName = QString(), const QString &password = QString(), bool readOnly = false);
     bool isListening();
 
 signals:
@@ -27,6 +27,7 @@ private:
     QString rootPath;
     SslServer *server;
     QString previousPeerIp;
+    bool readOnly;
 };
 
 #endif // FTPSERVER_H

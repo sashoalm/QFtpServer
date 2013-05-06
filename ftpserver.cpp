@@ -5,7 +5,7 @@
 #include <QtCore/QDebug>
 #include <QtNetwork/QSslSocket>
 
-FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const QString &userName, const QString &password) :
+FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const QString &userName, const QString &password, bool readOnly) :
     QObject(parent)
 {
     server = new SslServer(this);
@@ -14,6 +14,7 @@ FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const Q
     this->userName = userName;
     this->password = password;
     this->rootPath = rootPath;
+    this->readOnly = readOnly;
 }
 
 bool FtpServer::isListening()
@@ -32,5 +33,5 @@ void FtpServer::startNewControlConnection()
         previousPeerIp = peerIp;
     }
 
-    new FtpControlConnection(this, socket, rootPath, userName, password);
+    new FtpControlConnection(this, socket, rootPath, userName, password, readOnly);
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>204</width>
+    <width>206</width>
     <height>320</height>
    </rect>
   </property>
@@ -110,6 +110,13 @@
       </property>
      </widget>
     </item>
+    <item row="7" column="0" colspan="3">
+     <widget class="QCheckBox" name="checkBoxReadOnly">
+      <property name="text">
+       <string>Read-only</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -117,8 +124,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>204</width>
-     <height>20</height>
+     <width>206</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>

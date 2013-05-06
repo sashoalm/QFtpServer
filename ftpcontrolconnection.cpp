@@ -15,13 +15,14 @@
 #include <QtCore/QTimer>
 #include <QtNetwork/QSslSocket>
 
-FtpControlConnection::FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName, const QString &password) :
+FtpControlConnection::FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName, const QString &password, bool readOnly) :
     QObject(parent)
 {
     this->socket = socket;
     this->userName = userName;
     this->password = password;
     this->rootPath = rootPath;
+    this->readOnly = readOnly;
     isLoggedIn = false;
     encryptDataConnection = false;
     socket->setParent(this);
@@ -129,20 +130,6 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
             list(toLocalPath(commandParameters));
         else if ("RETR" == command)
             retr(toLocalPath(commandParameters));
-        else if ("STOR" == command)
-            stor(toLocalPath(commandParameters));
-        else if ("MKD" == command)
-            mkd(toLocalPath(commandParameters));
-        else if ("RMD" == command)
-            rmd(toLocalPath(commandParameters));
-        else if ("DELE" == command)
-            dele(toLocalPath(commandParameters));
-        else if ("RNFR" == command)
-            reply(350);
-        else if ("RNTO" == command)
-            rnto(toLocalPath(commandParameters));
-        else if ("APPE" == command)
-            stor(toLocalPath(commandParameters), true);
         else if ("REST" == command)
             reply(350);
         else if ("NLST" == command)
@@ -161,6 +148,21 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
             reply(200);
         else if ("NOOP" == command)
             reply(200);
+        // The following commands are not available in read-only mode.
+        else if (!readOnly && "STOR" == command)
+            stor(toLocalPath(commandParameters));
+        else if (!readOnly && "MKD" == command)
+            mkd(toLocalPath(commandParameters));
+        else if (!readOnly && "RMD" == command)
+            rmd(toLocalPath(commandParameters));
+        else if (!readOnly && "DELE" == command)
+            dele(toLocalPath(commandParameters));
+        else if (!readOnly && "RNFR" == command)
+            reply(350);
+        else if (!readOnly && "RNTO" == command)
+            rnto(toLocalPath(commandParameters));
+        else if (!readOnly && "APPE" == command)
+            stor(toLocalPath(commandParameters), true);
         else
             reply(502);
     } else {
