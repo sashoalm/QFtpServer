@@ -27,11 +27,13 @@ void FtpServer::startNewControlConnection()
     qDebug() << "FtpServer::acceptConnection";
     QSslSocket *socket = (QSslSocket *) server->nextPendingConnection();
 
+    // If this is not a previously encountered IP emit the newPeerIp signal.
     QString peerIp = socket->peerAddress().toString();
-    if (previousPeerIp != peerIp) {
-        emit newPeerIp(socket->peerAddress().toString());
-        previousPeerIp = peerIp;
+    if (!encounteredIps.contains(peerIp)) {
+        emit newPeerIp(peerIp);
+        encounteredIps.insert(peerIp);
     }
 
+    // Create a new FTP control connection on this socket.
     new FtpControlConnection(this, socket, rootPath, userName, password, readOnly);
 }
