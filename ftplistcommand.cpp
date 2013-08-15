@@ -70,9 +70,10 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
         // File size.
         line += ' ' + QString::number(fi.size());
 
-        // Last modified.
+        // Last modified - note we **must** use english locale, otherwise FTP clients won't understand us.
+        QLocale locale(QLocale::English);
         QDateTime lm = fi.lastModified();
-        line += ' ' + lm.date().toString("MMM d") + ' ' + lm.time().toString("hh:mm");
+        line += ' ' + locale.toString(lm.date(), "MMM d") + ' ' + locale.toString(lm.time(), "hh:mm");
     }
     line += ' ' + fi.fileName();
     line += "\r\n";
