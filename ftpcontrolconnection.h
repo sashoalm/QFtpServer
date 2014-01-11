@@ -1,8 +1,8 @@
 #ifndef FTPCONTROLCONNECTION_H
 #define FTPCONTROLCONNECTION_H
 
-#include <QtCore/QObject>
-#include <QtCore/QPointer>
+#include <QObject>
+#include <QPointer>
 
 class QTcpServer;
 class QSslSocket;

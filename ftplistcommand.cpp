@@ -1,10 +1,10 @@
 #include "ftplistcommand.h"
 
-#include <QtCore/QFile>
-#include <QtCore/QDir>
-#include <QtCore/QDateTime>
-#include <QtCore/QTimer>
-#include <QtNetwork/QTcpSocket>
+#include <QFile>
+#include <QDir>
+#include <QDateTime>
+#include <QTimer>
+#include <QTcpSocket>
 
 FtpListCommand::FtpListCommand(QObject *parent, const QString &fileName, bool nameListOnly) :
     FtpCommand(parent)

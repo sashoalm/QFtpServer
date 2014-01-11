@@ -46,6 +46,8 @@ FORMS += mainwindow.ui \
     debuglogdialog.ui
 QT += network
 
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
 qtcAddDeployment()

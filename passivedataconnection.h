@@ -5,8 +5,8 @@ class SslServer;
 class QSslSocket;
 class FtpCommand;
 
-#include <QtCore/QObject>
-#include <QtCore/QPointer>
+#include <QObject>
+#include <QPointer>
 
 // This class encapsulates the logic of the creation of the passive data
 // connections. In short - there can be only one passive data connection per

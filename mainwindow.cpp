@@ -3,11 +3,11 @@
 #include "ftpserver.h"
 #include "debuglogdialog.h"
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QSettings>
-#include <QtNetwork/QNetworkInterface>
-#include <QtNetwork/QHostAddress>
-#include <QtGui/QFileDialog>
+#include <QCoreApplication>
+#include <QSettings>
+#include <QNetworkInterface>
+#include <QHostAddress>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -40,8 +40,9 @@ void MainWindow::setOrientation(ScreenOrientation orientation)
 
     Qt::WidgetAttribute attribute;
     switch (orientation) {
-#if QT_VERSION < 0x040702
+#if QT_VERSION < 0x040702 || QT_VERSION >= 0x050000
     // Qt < 4.7.2 does not yet have the Qt::WA_*Orientation attributes
+    // Qt 5 has removed them.
     case ScreenOrientationLockPortrait:
         attribute = static_cast<Qt::WidgetAttribute>(128);
         break;
@@ -70,7 +71,7 @@ void MainWindow::setOrientation(ScreenOrientation orientation)
 
 void MainWindow::showExpanded()
 {
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR)
+#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR) || defined (Q_OS_ANDROID)
     showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
     showMaximized();

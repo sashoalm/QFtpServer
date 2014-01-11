@@ -1,7 +1,7 @@
 #include "passivedataconnection.h"
 #include "sslserver.h"
 #include "ftpcommand.h"
-#include <QtNetwork/QSslSocket>
+#include <QSslSocket>
 
 PassiveDataConnection::PassiveDataConnection(QObject *parent) :
     QObject(parent)

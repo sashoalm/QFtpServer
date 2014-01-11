@@ -3,10 +3,18 @@
 
 static DebugLogDialog *theDialog = 0;
 
+// The message handler's signature has changed in Qt5.
+#if QT_VERSION >= 0x050000
+void DebugLogDialog::myMessageOutput(QtMsgType /*type*/, const QMessageLogContext &/*context*/, const QString &msg)
+{
+    theDialog->ui->plainTextEdit->appendPlainText(msg);
+}
+#else
 void DebugLogDialog::myMessageOutput(QtMsgType /*type*/, const char *msg)
 {
     theDialog->ui->plainTextEdit->appendPlainText(msg);
 }
+#endif
 
 DebugLogDialog::DebugLogDialog(QWidget *parent) :
     QDialog(parent),
@@ -14,12 +22,23 @@ DebugLogDialog::DebugLogDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     theDialog = this;
+
+    // The message handler's signature has changed in Qt5.
+#if QT_VERSION >= 0x050000
+    qInstallMessageHandler(myMessageOutput);
+#else
     qInstallMsgHandler(myMessageOutput);
+#endif
 }
 
 DebugLogDialog::~DebugLogDialog()
 {
+    // The message handler's signature has changed in Qt5.
+#if QT_VERSION >= 0x050000
+    qInstallMessageHandler(0);
+#else
     qInstallMsgHandler(0);
+#endif
     delete ui;
 }
 
@@ -38,8 +57,9 @@ void DebugLogDialog::setOrientation(ScreenOrientation orientation)
 
     Qt::WidgetAttribute attribute;
     switch (orientation) {
-#if QT_VERSION < 0x040702
+#if QT_VERSION < 0x040702 || QT_VERSION >= 0x050000
     // Qt < 4.7.2 does not yet have the Qt::WA_*Orientation attributes
+    // Qt 5 has removed them.
     case ScreenOrientationLockPortrait:
         attribute = static_cast<Qt::WidgetAttribute>(128);
         break;
@@ -68,7 +88,7 @@ void DebugLogDialog::setOrientation(ScreenOrientation orientation)
 
 void DebugLogDialog::showExpanded()
 {
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR)
+#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR) || defined (Q_OS_ANDROID)
     showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
     showMaximized();

@@ -1,7 +1,7 @@
 #include "sslserver.h"
 
-#include <QtNetwork/QSslSocket>
-#include <QtNetwork/QSslKey>
+#include <QSslSocket>
+#include <QSslKey>
 
 SslServer::SslServer(QObject *parent) :
     QTcpServer(parent)

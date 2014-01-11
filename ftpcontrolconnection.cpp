@@ -5,15 +5,15 @@
 #include "sslserver.h"
 #include "passivedataconnection.h"
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QDateTime>
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
-#include <QtCore/QDir>
-#include <QtCore/QEventLoop>
-#include <QtCore/QDebug>
-#include <QtCore/QTimer>
-#include <QtNetwork/QSslSocket>
+#include <QFileInfo>
+#include <QDateTime>
+#include <QDir>
+#include <QStringList>
+#include <QDir>
+#include <QEventLoop>
+#include <QDebug>
+#include <QTimer>
+#include <QSslSocket>
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName, const QString &password, bool readOnly) :
     QObject(parent)

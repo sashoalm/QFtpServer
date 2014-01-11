@@ -1,6 +1,6 @@
 #include "ftpcommand.h"
 
-#include <QtNetwork/QSslSocket>
+#include <QSslSocket>
 
 FtpCommand::FtpCommand(QObject *parent) :
     QObject(parent)

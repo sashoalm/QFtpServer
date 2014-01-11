@@ -1,6 +1,6 @@
 #include "ftpretrcommand.h"
-#include <QtCore/QFile>
-#include <QtNetwork/QTcpSocket>
+#include <QFile>
+#include <QTcpSocket>
 
 FtpRetrCommand::FtpRetrCommand(QObject *parent, const QString &fileName, qint64 seekTo) :
     FtpCommand(parent)
