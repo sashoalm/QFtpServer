@@ -13,7 +13,9 @@ class FtpServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit FtpServer(QObject *parent, const QString &rootPath, int port = 21, const QString &userName = QString(), const QString &password = QString(), bool readOnly = false);
+    explicit FtpServer(QObject *parent, const QString &rootPath, int port = 21,
+                       const QString &userName = QString(), const QString &password = QString(),
+                       bool readOnly = false, bool onlyOneIpAllowed = false);
 
     // Whether or not the server is listening for incoming connections. If it
     // is not currently listening then there was an error - probably no
@@ -54,6 +56,11 @@ private:
     // Whether or not the server is in read-only mode. In read-only mode the
     // server will not create, modify or delete any files or directories.
     bool readOnly;
+
+    // Causes the server to remember the first IP that connects to it, and then
+    // refuse connections from any other IP. This makes sense because a mobile
+    // phone is unlikely to be used from 2 places at once.
+    bool onlyOneIpAllowed;
 };
 
 #endif // FTPSERVER_H

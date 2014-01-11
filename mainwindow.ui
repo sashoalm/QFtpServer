@@ -117,6 +117,13 @@
       </property>
      </spacer>
     </item>
+    <item row="8" column="0" colspan="3">
+     <widget class="QCheckBox" name="checkBoxOnlyOneIpAllowed">
+      <property name="text">
+       <string>Only one IP allowed</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">

@@ -89,6 +89,7 @@ void MainWindow::loadSettings()
     ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
     ui->checkBoxAnonymous->setChecked(settings.value("settings/anonymous", false).toBool());
     ui->checkBoxReadOnly->setChecked(settings.value("settings/readonly", false).toBool());
+    ui->checkBoxOnlyOneIpAllowed->setChecked(settings.value("settings/oneip", true).toBool());
 }
 
 void MainWindow::saveSettings()
@@ -100,6 +101,7 @@ void MainWindow::saveSettings()
     settings.setValue("settings/rootpath", ui->lineEditRootPath->text());
     settings.setValue("settings/anonymous", ui->checkBoxAnonymous->isChecked());
     settings.setValue("settings/readonly", ui->checkBoxReadOnly->isChecked());
+    settings.setValue("settings/oneip", ui->checkBoxOnlyOneIpAllowed->isChecked());
 }
 
 void MainWindow::startServer()
@@ -111,7 +113,8 @@ void MainWindow::startServer()
         password = ui->lineEditPassword->text();
     }
     delete server;
-    server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName, password, ui->checkBoxReadOnly->isChecked());
+    server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName,
+                           password, ui->checkBoxReadOnly->isChecked(), ui->checkBoxOnlyOneIpAllowed->isChecked());
     connect(server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
     if (server->isListening()) {
         ui->statusBar->showMessage("Listening at " + lanIp());
