@@ -55,15 +55,15 @@ void FtpControlConnection::disconnectFromHost()
     socket->disconnectFromHost();
 }
 
-void FtpControlConnection::splitCommand(const QString &entireCommand, QString &command, QString &commandParameters)
+void FtpControlConnection::parseCommand(const QString &entireCommand, QString *command, QString *commandParameters)
 {
     // Split parameters and command.
     int pos = entireCommand.indexOf(' ');
     if (-1 != pos) {
-        command = entireCommand.left(pos).trimmed().toUpper();
-        commandParameters = entireCommand.mid(pos+1).trimmed();
+        *command = entireCommand.left(pos).trimmed().toUpper();
+        *commandParameters = entireCommand.mid(pos+1).trimmed();
     } else {
-        command = entireCommand.trimmed().toUpper();
+        *command = entireCommand.trimmed().toUpper();
     }
 }
 
@@ -122,7 +122,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
 
     QString command;
     QString commandParameters;
-    splitCommand(entireCommand, command, commandParameters);
+    parseCommand(entireCommand, &command, &commandParameters);
 
     if ("USER" == command) {
         reply(331);
@@ -270,7 +270,7 @@ void FtpControlConnection::rnto(const QString &fileName)
 {
     QString command;
     QString commandParameters;
-    splitCommand(lastProcessedCommand, command, commandParameters);
+    parseCommand(lastProcessedCommand, &command, &commandParameters);
     if ("RNFR" == command && QDir().rename(toLocalPath(commandParameters), fileName)) {
         reply(250);
     } else {
@@ -304,7 +304,7 @@ void FtpControlConnection::pass(const QString &password)
 {
     QString command;
     QString commandParameters;
-    splitCommand(lastProcessedCommand, command, commandParameters);
+    parseCommand(lastProcessedCommand, &command, &commandParameters);
     if (this->password.isEmpty() || ("USER" == command && this->userName == commandParameters && this->password == password)) {
         reply(230);
         isLoggedIn = true;
@@ -359,7 +359,7 @@ qint64 FtpControlConnection::seekTo()
     qint64 seekTo = 0;
     QString command;
     QString commandParameters;
-    splitCommand(lastProcessedCommand, command, commandParameters);
+    parseCommand(lastProcessedCommand, &command, &commandParameters);
     if ("REST" == command) {
         QTextStream(commandParameters.toUtf8()) >> seekTo;
     }

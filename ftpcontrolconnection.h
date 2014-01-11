@@ -35,10 +35,12 @@ private slots:
     void disconnectFromHost();
 
 private:
-    // Utility function that splits a line between the command, and its
-    // parameters. For example, in "CD /path/to/dir", "CD" is the command, and
-    // "/path/to/dir" are the parameters.
-    void splitCommand(const QString &entireCommand, QString &command, QString &commandParameters);
+    // Each FTP command can have optional arguments. This function splits the
+    // command name from the command arguments. This function splits the
+    // command and arguments, and makes the command uppercase. For example, in
+    // "cd /path/to/dir", "CD" is the command, and "/path/to/dir" are the
+    // parameters.
+    void parseCommand(const QString &entireCommand, QString *command, QString *commandParameters);
     // Converts a relative or absolute path given by the FTP client to a
     // local path (local for the OS on which the ftp server is running).
     QString toLocalPath(const QString &fileName) const;
