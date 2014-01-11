@@ -35,13 +35,13 @@ public:
     // Returns the currently running ftpCommand, if it is already running, but
     // not yet finished. Otherwise returns 0.
     FtpCommand *ftpCommand();
-    
+
 signals:
-    
+
 private slots:
     void newConnection();
     void encrypted();
-    
+
 private:
     void startFtpCommand();
     SslServer *server;

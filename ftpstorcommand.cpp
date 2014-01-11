@@ -15,10 +15,11 @@ FtpStorCommand::FtpStorCommand(QObject *parent, const QString &fileName, bool ap
 FtpStorCommand::~FtpStorCommand()
 {
     if (started) {
-        if (success)
+        if (success) {
             emit reply(226);
-        else
+        } else {
             emit reply(451);
+        }
     }
 }
 
@@ -31,8 +32,9 @@ void FtpStorCommand::startImplementation()
     }
     success = true;
     emit reply(150);
-    if (seekTo)
+    if (seekTo) {
         file->seek(seekTo);
+    }
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNextBlock()));
 }
 

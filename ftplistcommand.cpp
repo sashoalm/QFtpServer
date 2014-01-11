@@ -15,8 +15,9 @@ FtpListCommand::FtpListCommand(QObject *parent, const QString &fileName, bool na
 
 FtpListCommand::~FtpListCommand()
 {
-    if (started)
+    if (started) {
         emit reply(226);
+    }
 }
 
 void FtpListCommand::startImplementation()
@@ -42,9 +43,13 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
     QString line;
     if (!nameListOnly) {
         // Directory/symlink/file.
-        if (fi.isSymLink()) line += 'l';
-        else if (fi.isDir()) line += 'd';
-        else line += '-';
+        if (fi.isSymLink()) {
+            line += 'l';
+        } else if (fi.isDir()) {
+            line += 'd';
+        } else {
+            line += '-';
+        }
 
         // Permissions.
         QFile::Permissions p = fi.permissions();
@@ -60,11 +65,13 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
 
         // Owner/group.
         QString owner = fi.owner();
-        if (owner.isEmpty())
+        if (owner.isEmpty()) {
             owner = "unknown";
+        }
         QString group = fi.group();
-        if (group.isEmpty())
+        if (group.isEmpty()) {
             group = "unknown";
+        }
         line += ' ' + owner + ' ' + group;
 
         // File size.

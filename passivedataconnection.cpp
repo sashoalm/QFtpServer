@@ -29,8 +29,9 @@ int PassiveDataConnection::listen(bool encrypt)
 
 bool PassiveDataConnection::setFtpCommand(FtpCommand *command)
 {
-    if (!isWaitingForFtpCommand)
+    if (!isWaitingForFtpCommand) {
         return false;
+    }
     isWaitingForFtpCommand = false;
     this->command = command;
     command->setParent(this);
@@ -40,8 +41,9 @@ bool PassiveDataConnection::setFtpCommand(FtpCommand *command)
 
 FtpCommand *PassiveDataConnection::ftpCommand()
 {
-    if (isSocketReady)
+    if (isSocketReady) {
         return command;
+    }
     return 0;
 }
 
@@ -53,9 +55,9 @@ void PassiveDataConnection::newConnection()
         connect(socket, SIGNAL(encrypted()), this, SLOT(encrypted()));
         SslServer::setLocalCertificateAndPrivateKey(socket);
         socket->startServerEncryption();
-    }
-    else
+    } else {
         encrypted();
+    }
 }
 
 void PassiveDataConnection::encrypted()

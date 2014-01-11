@@ -113,17 +113,19 @@ void MainWindow::startServer()
     delete server;
     server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName, password, ui->checkBoxReadOnly->isChecked());
     connect(server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
-    if (server->isListening())
+    if (server->isListening()) {
         ui->statusBar->showMessage("Listening at " + lanIp());
-    else
+    } else {
         ui->statusBar->showMessage("Not listening");
+    }
 }
 
 QString MainWindow::lanIp()
 {
     foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)) {
             return address.toString();
+        }
     }
     return "";
 }
@@ -136,8 +138,9 @@ void MainWindow::on_pushButtonRestartServer_clicked()
 void MainWindow::on_toolButtonBrowse_clicked()
 {
     QString rootPath = QFileDialog::getExistingDirectory(this, QString(), ui->lineEditRootPath->text());
-    if (rootPath.isEmpty())
+    if (rootPath.isEmpty()) {
         return;
+    }
     ui->lineEditRootPath->setText(rootPath);
 }
 

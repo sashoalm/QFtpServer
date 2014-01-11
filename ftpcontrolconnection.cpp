@@ -39,8 +39,9 @@ FtpControlConnection::~FtpControlConnection()
 
 void FtpControlConnection::acceptNewData()
 {
-    if (!socket->canReadLine())
+    if (!socket->canReadLine()) {
         return;
+    }
     processCommand(QString::fromUtf8(socket->readLine()).trimmed());
     QTimer::singleShot(0, this, SLOT(acceptNewData()));
 }
@@ -66,14 +67,16 @@ QString FtpControlConnection::toLocalPath(const QString &fileName) const
 {
     QString localPath = fileName;
     localPath.replace('\\', '/');
-    if (!localPath.startsWith('/'))
+    if (!localPath.startsWith('/')) {
         localPath = currentDirectory + '/' + localPath;
+    }
 
     QStringList components;
     foreach (const QString &component, localPath.split('/', QString::SkipEmptyParts)) {
         if (component == "..") {
-            if (components.isEmpty())
+            if (components.isEmpty()) {
                 return QString();
+            }
             components.pop_back();
         } else if (component != ".") {
             components += component;
@@ -81,8 +84,9 @@ QString FtpControlConnection::toLocalPath(const QString &fileName) const
     }
 
     localPath = rootPath;
-    foreach (const QString &component, components)
+    foreach (const QString &component, components) {
         localPath += '/' + component;
+    }
     localPath = QDir::cleanPath(localPath);
 
     qDebug() << "FtpControlConnection::toLocalPath" << fileName << "->" << localPath;
@@ -93,10 +97,11 @@ void FtpControlConnection::reply(int code, const QString &details)
 {
     qDebug() << "FtpControlConnection::reply" << code << details;
 
-    if (details.isEmpty())
+    if (details.isEmpty()) {
         socket->write(QString("%1 comment\r\n").arg(code).toUtf8());
-    else
+    } else {
         socket->write(QString("%1 %2\r\n").arg(code).arg(details).toUtf8());
+    }
 }
 
 void FtpControlConnection::processCommand(const QString &entireCommand)
@@ -107,64 +112,66 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     QString commandParameters;
     splitCommand(entireCommand, command, commandParameters);
 
-    if ("USER" == command)
+    if ("USER" == command) {
         reply(331);
-    else if ("PASS" == command)
+    } else if ("PASS" == command) {
         pass(commandParameters);
-    else if ("QUIT" == command)
+    } else if ("QUIT" == command) {
         quit();
-    else if ("AUTH" == command && "TLS" == commandParameters.toUpper())
+    } else if ("AUTH" == command && "TLS" == commandParameters.toUpper()) {
         auth();
-    else if ("FEAT" == command)
+    } else if ("FEAT" == command) {
         feat();
-    else if (isLoggedIn) {
-        if ("PWD" == command)
+    } else if (isLoggedIn) {
+        if ("PWD" == command) {
             reply(227, '"' + currentDirectory + '"');
-        else if ("CWD" == command)
+        } else if ("CWD" == command) {
             cwd(commandParameters);
-        else if ("TYPE" == command)
+        } else if ("TYPE" == command) {
             reply(200);
-        else if ("PASV" == command)
+        } else if ("PASV" == command) {
             pasv();
-        else if ("LIST" == command)
+        } else if ("LIST" == command) {
             list(toLocalPath(commandParameters));
-        else if ("RETR" == command)
+        } else if ("RETR" == command) {
             retr(toLocalPath(commandParameters));
-        else if ("REST" == command)
+        } else if ("REST" == command) {
             reply(350);
-        else if ("NLST" == command)
+        } else if ("NLST" == command) {
             list(toLocalPath(""));
-        else if ("SIZE" == command)
+        } else if ("SIZE" == command) {
             size(toLocalPath(commandParameters));
-        else if ("SYST" == command)
+        } else if ("SYST" == command) {
             reply(215, "UNIX");
-        else if ("PROT" == command)
+        } else if ("PROT" == command) {
             prot(commandParameters.toUpper());
-        else if ("CDUP" == command)
+        } else if ("CDUP" == command) {
             cdup();
-        else if ("OPTS" == command && "UTF8 ON" == commandParameters.toUpper())
+        } else if ("OPTS" == command && "UTF8 ON" == commandParameters.toUpper()) {
             reply(200);
-        else if ("PBSZ" == command && "0" == commandParameters.toUpper())
+        } else if ("PBSZ" == command && "0" == commandParameters.toUpper()) {
             reply(200);
-        else if ("NOOP" == command)
+        } else if ("NOOP" == command) {
             reply(200);
+        }
         // The following commands are not available in read-only mode.
-        else if (!readOnly && "STOR" == command)
+        else if (!readOnly && "STOR" == command) {
             stor(toLocalPath(commandParameters));
-        else if (!readOnly && "MKD" == command)
+        } else if (!readOnly && "MKD" == command) {
             mkd(toLocalPath(commandParameters));
-        else if (!readOnly && "RMD" == command)
+        } else if (!readOnly && "RMD" == command) {
             rmd(toLocalPath(commandParameters));
-        else if (!readOnly && "DELE" == command)
+        } else if (!readOnly && "DELE" == command) {
             dele(toLocalPath(commandParameters));
-        else if (!readOnly && "RNFR" == command)
+        } else if (!readOnly && "RNFR" == command) {
             reply(350);
-        else if (!readOnly && "RNTO" == command)
+        } else if (!readOnly && "RNTO" == command) {
             rnto(toLocalPath(commandParameters));
-        else if (!readOnly && "APPE" == command)
+        } else if (!readOnly && "APPE" == command) {
             stor(toLocalPath(commandParameters), true);
-        else
+        } else {
             reply(502);
+        }
     } else {
         reply(530);
     }
@@ -209,10 +216,11 @@ void FtpControlConnection::cwd(const QString &dir)
     QFileInfo fi(toLocalPath(dir));
     if (fi.exists() && fi.isDir()) {
         QFileInfo fi(dir);
-        if (fi.isAbsolute())
+        if (fi.isAbsolute()) {
             currentDirectory = QDir::cleanPath(dir);
-        else
+        } else {
             currentDirectory = QDir::cleanPath(currentDirectory + '/' + dir);
+        }
         reply(250);
     } else {
         reply(550);
@@ -221,26 +229,29 @@ void FtpControlConnection::cwd(const QString &dir)
 
 void FtpControlConnection::mkd(const QString &dir)
 {
-    if (QDir().mkdir(dir))
+    if (QDir().mkdir(dir)) {
         reply(257);
-    else
+    } else {
         reply(550);
+    }
 }
 
 void FtpControlConnection::rmd(const QString &dir)
 {
-    if (QDir().rmdir(dir))
+    if (QDir().rmdir(dir)) {
         reply(250);
-    else
+    } else {
         reply(550);
+    }
 }
 
 void FtpControlConnection::dele(const QString &fileName)
 {
-    if (QDir().remove(fileName))
+    if (QDir().remove(fileName)) {
         reply(250);
-    else
+    } else {
         reply(550);
+    }
 }
 
 void FtpControlConnection::rnto(const QString &fileName)
@@ -248,28 +259,31 @@ void FtpControlConnection::rnto(const QString &fileName)
     QString command;
     QString commandParameters;
     splitCommand(lastProcessedCommand, command, commandParameters);
-    if ("RNFR" == command && QDir().rename(toLocalPath(commandParameters), fileName))
+    if ("RNFR" == command && QDir().rename(toLocalPath(commandParameters), fileName)) {
         reply(250);
-    else
+    } else {
         reply(550);
+    }
 }
 
 void FtpControlConnection::quit()
 {
     reply(221);
-    if (dataConnection->ftpCommand())
+    if (dataConnection->ftpCommand()) {
         connect(dataConnection->ftpCommand(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
-    else
+    } else {
         disconnectFromHost();
+    }
 }
 
 void FtpControlConnection::size(const QString &fileName)
 {
     QFileInfo fi(fileName);
-    if (!fi.exists() || fi.isDir())
+    if (!fi.exists() || fi.isDir()) {
         reply(550);
-    else
+    } else {
         reply(213, QString("%1").arg(fi.size()));
+    }
 }
 
 void FtpControlConnection::pass(const QString &password)
@@ -280,8 +294,9 @@ void FtpControlConnection::pass(const QString &password)
     if (this->password.isEmpty() || ("USER" == command && this->userName == commandParameters && this->password == password)) {
         reply(230);
         isLoggedIn = true;
-    } else
+    } else {
         reply(530);
+    }
 }
 
 void FtpControlConnection::auth()
@@ -293,11 +308,11 @@ void FtpControlConnection::auth()
 
 void FtpControlConnection::prot(const QString &protectionLevel)
 {
-    if ("C" == protectionLevel)
+    if ("C" == protectionLevel) {
         encryptDataConnection = false;
-    else if ("P" == protectionLevel)
+    } else if ("P" == protectionLevel) {
         encryptDataConnection = true;
-    else {
+    } else {
         reply(502);
         return;
     }
@@ -306,19 +321,20 @@ void FtpControlConnection::prot(const QString &protectionLevel)
 
 void FtpControlConnection::cdup()
 {
-    if ("/" == currentDirectory)
+    if ("/" == currentDirectory) {
         reply(250);
-    else
+    } else {
         cwd("..");
+    }
 }
 
 void FtpControlConnection::feat()
 {
     socket->write(
-                "211-Features:\r\n"
-                " UTF8\r\n"
-                "211 End\r\n"
-                );
+        "211-Features:\r\n"
+        " UTF8\r\n"
+        "211 End\r\n"
+    );
 }
 
 qint64 FtpControlConnection::seekTo()
@@ -327,7 +343,8 @@ qint64 FtpControlConnection::seekTo()
     QString command;
     QString commandParameters;
     splitCommand(lastProcessedCommand, command, commandParameters);
-    if ("REST" == command)
+    if ("REST" == command) {
         QTextStream(commandParameters.toUtf8()) >> seekTo;
+    }
     return seekTo;
 }

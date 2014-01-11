@@ -13,10 +13,11 @@ FtpRetrCommand::FtpRetrCommand(QObject *parent, const QString &fileName, qint64 
 FtpRetrCommand::~FtpRetrCommand()
 {
     if (started) {
-        if (file && file->isOpen() && file->atEnd())
+        if (file && file->isOpen() && file->atEnd()) {
             emit reply(226);
-        else
+        } else {
             emit reply(550);
+        }
     }
 }
 
@@ -28,16 +29,18 @@ void FtpRetrCommand::startImplementation()
         return;
     }
     emit reply(150);
-    if (seekTo)
+    if (seekTo) {
         file->seek(seekTo);
+    }
     connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
     refillSocketBuffer(128*1024);
 }
 
 void FtpRetrCommand::refillSocketBuffer(qint64 bytes)
 {
-    if (!file->atEnd())
+    if (!file->atEnd()) {
         socket->write(file->read(bytes));
-    else
+    } else {
         socket->disconnectFromHost();
+    }
 }

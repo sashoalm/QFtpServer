@@ -27,7 +27,7 @@ signals:
     // stored and will not cause this FTP server instance to emit this signal
     // any more.
     void newPeerIp(const QString &ip);
-    
+
 private slots:
     // Called by the SSL server when we have received a new connection.
     void startNewControlConnection();
