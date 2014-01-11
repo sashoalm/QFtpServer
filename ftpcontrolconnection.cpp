@@ -91,27 +91,20 @@ QString FtpControlConnection::toLocalPath(const QString &fileName) const
         localPath = currentDirectory + '/' + localPath;
     }
 
-    // Take care of ".." and "."
+    // Evaluate all the ".." and ".", "/path/././to/dir/../.." becomes "/path".
     QStringList components;
     foreach (const QString &component, localPath.split('/', QString::SkipEmptyParts)) {
         if (component == "..") {
-            // This prevents the client from "jailbreaking" the root directory
-            // of the FTP server.
-            if (components.isEmpty()) {
-                return QString();
+            if (!components.isEmpty()) {
+                components.pop_back();
             }
-            components.pop_back();
         } else if (component != ".") {
             components += component;
         }
     }
 
-    // Add the root path.
-    localPath = rootPath;
-    foreach (const QString &component, components) {
-        localPath += '/' + component;
-    }
-    localPath = QDir::cleanPath(localPath);
+    // Prepend the root path.
+    localPath = QDir::cleanPath(rootPath + '/' + components.join("/"));
 
     qDebug() << "FtpControlConnection::toLocalPath" << fileName << "->" << localPath;
     return localPath;
