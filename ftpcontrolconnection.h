@@ -35,6 +35,11 @@ private slots:
     void disconnectFromHost();
 
 private:
+    // Workaround for some clients that will send "LIST -L" or "NLST -L", which
+    // causes our server to take "-L" for a filename, and fail to produce a
+    // listing. See http://stackoverflow.com/q/21065113/492336. This function
+    // strips that flag.
+    QString stripFlagL(const QString &fileName);
     // Each FTP command can have optional arguments. This function splits the
     // command name from the command arguments. This function splits the
     // command and arguments, and makes the command uppercase. For example, in
@@ -50,7 +55,7 @@ private:
     // Open a new passive data connection.
     void pasv();
     // List directory contents. Equivalent to 'ls' in UNIX, or 'dir' in DOS.
-    void list(const QString &dir, bool nameListOnly = false);
+    void list(const QString &dir, bool nameListOnly);
     // Retrieve a file. FTP client uses this command to download files.
     void retr(const QString &fileName);
     // Store a file. FTP client uses this command to upload files.

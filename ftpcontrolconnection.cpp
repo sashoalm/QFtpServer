@@ -55,6 +55,18 @@ void FtpControlConnection::disconnectFromHost()
     socket->disconnectFromHost();
 }
 
+QString FtpControlConnection::stripFlagL(const QString &fileName)
+{
+    QString a = fileName.toUpper();
+    if (a == "-L") {
+        return "";
+    }
+    if (a.startsWith("-L ")) {
+        return fileName.mid(3);
+    }
+    return fileName;
+}
+
 void FtpControlConnection::parseCommand(const QString &entireCommand, QString *command, QString *commandParameters)
 {
     // Split parameters and command.
@@ -144,13 +156,13 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         } else if ("PASV" == command) {
             pasv();
         } else if ("LIST" == command) {
-            list(toLocalPath(commandParameters));
+            list(toLocalPath(stripFlagL(commandParameters)), false);
         } else if ("RETR" == command) {
             retr(toLocalPath(commandParameters));
         } else if ("REST" == command) {
             reply(350);
         } else if ("NLST" == command) {
-            list(toLocalPath(""));
+            list(toLocalPath(stripFlagL(commandParameters)), true);
         } else if ("SIZE" == command) {
             size(toLocalPath(commandParameters));
         } else if ("SYST" == command) {
