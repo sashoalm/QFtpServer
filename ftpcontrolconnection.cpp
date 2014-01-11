@@ -42,6 +42,10 @@ void FtpControlConnection::acceptNewData()
     if (!socket->canReadLine()) {
         return;
     }
+
+    // Note how we execute only one line, and use QTimer::singleShot, instead
+    // of using a for-loop until no more lines are available. This is done
+    // so we don't block the event loop for a long time.
     processCommand(QString::fromUtf8(socket->readLine()).trimmed());
     QTimer::singleShot(0, this, SLOT(acceptNewData()));
 }
@@ -66,14 +70,21 @@ void FtpControlConnection::splitCommand(const QString &entireCommand, QString &c
 QString FtpControlConnection::toLocalPath(const QString &fileName) const
 {
     QString localPath = fileName;
+
+    // Some FTP clients send backslashes.
     localPath.replace('\\', '/');
+
+    // If this is a relative path, we prepend the current directory.
     if (!localPath.startsWith('/')) {
         localPath = currentDirectory + '/' + localPath;
     }
 
+    // Take care of ".." and "."
     QStringList components;
     foreach (const QString &component, localPath.split('/', QString::SkipEmptyParts)) {
         if (component == "..") {
+            // This prevents the client from "jailbreaking" the root directory
+            // of the FTP server.
             if (components.isEmpty()) {
                 return QString();
             }
@@ -83,6 +94,7 @@ QString FtpControlConnection::toLocalPath(const QString &fileName) const
         }
     }
 
+    // Add the root path.
     localPath = rootPath;
     foreach (const QString &component, components) {
         localPath += '/' + component;
@@ -269,6 +281,8 @@ void FtpControlConnection::rnto(const QString &fileName)
 void FtpControlConnection::quit()
 {
     reply(221);
+    // If we have a running download or upload, we will wait until it's
+    // finished before closing the control connection.
     if (dataConnection->ftpCommand()) {
         connect(dataConnection->ftpCommand(), SIGNAL(destroyed()), this, SLOT(disconnectFromHost()));
     } else {
@@ -330,6 +344,9 @@ void FtpControlConnection::cdup()
 
 void FtpControlConnection::feat()
 {
+    // We only report that we support UTF8 file names, this is needed because
+    // some clients will assume that we use ASCII otherwise, and will not
+    // encode the filenames properly.
     socket->write(
         "211-Features:\r\n"
         " UTF8\r\n"
