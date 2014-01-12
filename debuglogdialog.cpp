@@ -5,14 +5,14 @@ static DebugLogDialog *theDialog = 0;
 
 // The message handler's signature has changed in Qt5.
 #if QT_VERSION >= 0x050000
-void DebugLogDialog::myMessageOutput(QtMsgType /*type*/, const QMessageLogContext &/*context*/, const QString &msg)
+static void myMessageOutput(QtMsgType /*type*/, const QMessageLogContext &/*context*/, const QString &msg)
 {
-    theDialog->ui->plainTextEdit->appendPlainText(msg);
+    theDialog->appendText(msg);
 }
 #else
-void DebugLogDialog::myMessageOutput(QtMsgType /*type*/, const char *msg)
+static void myMessageOutput(QtMsgType /*type*/, const char *msg)
 {
-    theDialog->ui->plainTextEdit->appendPlainText(msg);
+    theDialog->appendText(msg);
 }
 #endif
 
@@ -95,6 +95,11 @@ void DebugLogDialog::showExpanded()
 #else
     show();
 #endif
+}
+
+void DebugLogDialog::appendText(const QString &text)
+{
+    ui->plainTextEdit->appendPlainText(text);
 }
 
 void DebugLogDialog::on_pushButton_clicked()

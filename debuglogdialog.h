@@ -26,17 +26,12 @@ public:
 
     void showExpanded();
 
+    void appendText(const QString &text);
+
 private slots:
     void on_pushButton_clicked();
 
 private:
-
-    // The message handler's signature has changed in Qt5.
-#if QT_VERSION >= 0x050000
-    static void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-#else
-    static void myMessageOutput(QtMsgType type, const char *msg);
-#endif
 
     Ui::DebugLogDialog *ui;
 };
