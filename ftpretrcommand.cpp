@@ -32,7 +32,15 @@ void FtpRetrCommand::startImplementation()
     if (seekTo) {
         file->seek(seekTo);
     }
-    connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
+
+    // For encryted SSL sockets, we need to use the encryptedBytesWritten()
+    // signal, see the QSslSocket documentation to for reasons why.
+    if (socket->isEncrypted()) {
+        connect(socket, SIGNAL(encryptedBytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
+    } else {
+        connect(socket, SIGNAL(bytesWritten(qint64)), this, SLOT(refillSocketBuffer(qint64)));
+    }
+
     refillSocketBuffer(128*1024);
 }
 
