@@ -1,6 +1,6 @@
 #include "ftpstorcommand.h"
 #include <QFile>
-#include <QTcpSocket>
+#include <QSslSocket>
 
 FtpStorCommand::FtpStorCommand(QObject *parent, const QString &fileName, bool appendMode, qint64 seekTo) :
     FtpCommand(parent)

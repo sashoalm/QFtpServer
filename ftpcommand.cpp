@@ -8,7 +8,7 @@ FtpCommand::FtpCommand(QObject *parent) :
     started = false;
 }
 
-void FtpCommand::start(QTcpSocket *socket)
+void FtpCommand::start(QSslSocket *socket)
 {
     started = true;
     this->socket = socket;

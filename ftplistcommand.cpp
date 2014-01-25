@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QTimer>
-#include <QTcpSocket>
+#include <QSslSocket>
 
 FtpListCommand::FtpListCommand(QObject *parent, const QString &fileName, bool nameListOnly) :
     FtpCommand(parent)

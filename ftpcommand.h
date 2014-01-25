@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class QTcpSocket;
+class QSslSocket;
 
 // The base class for all FTP commands that need a data connection.
 
@@ -17,11 +17,11 @@ signals:
     void reply(int code, const QString &details = QString());
 
 public:
-    void start(QTcpSocket *socket);
+    void start(QSslSocket *socket);
 
 protected:
     virtual void startImplementation() = 0;
-    QTcpSocket* socket;
+    QSslSocket* socket;
     bool started;
 };
 

@@ -31,7 +31,7 @@ public slots:
 private slots:
     // Handles any new data comming from the FTP client.
     void acceptNewData();
-    // We need this because QTcpSocket::disconnectFromHost() is not a slot.
+    // We need this because QSslSocket::disconnectFromHost() is not a slot.
     void disconnectFromHost();
 
 private:
