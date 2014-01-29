@@ -139,58 +139,154 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         auth();
     } else if ("FEAT" == command) {
         feat();
-    } else if (isLoggedIn) {
-        if ("PWD" == command) {
+    } else if ("PWD" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
             reply(227, '"' + currentDirectory + '"');
-        } else if ("CWD" == command) {
+        }
+    } else if ("CWD" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
             cwd(commandParameters);
-        } else if ("TYPE" == command) {
-            reply(200);
-        } else if ("PASV" == command) {
-            pasv();
-        } else if ("LIST" == command) {
-            list(toLocalPath(stripFlagL(commandParameters)), false);
-        } else if ("RETR" == command) {
-            retr(toLocalPath(commandParameters));
-        } else if ("REST" == command) {
-            reply(350);
-        } else if ("NLST" == command) {
-            list(toLocalPath(stripFlagL(commandParameters)), true);
-        } else if ("SIZE" == command) {
-            size(toLocalPath(commandParameters));
-        } else if ("SYST" == command) {
-            reply(215, "UNIX");
-        } else if ("PROT" == command) {
-            prot(commandParameters.toUpper());
-        } else if ("CDUP" == command) {
-            cdup();
-        } else if ("OPTS" == command && "UTF8 ON" == commandParameters.toUpper()) {
-            reply(200);
-        } else if ("PBSZ" == command && "0" == commandParameters.toUpper()) {
-            reply(200);
-        } else if ("NOOP" == command) {
+        }
+    } else if ("TYPE" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
             reply(200);
         }
-        // The following commands are not available in read-only mode.
-        else if (!readOnly && "STOR" == command) {
-            stor(toLocalPath(commandParameters));
-        } else if (!readOnly && "MKD" == command) {
-            mkd(toLocalPath(commandParameters));
-        } else if (!readOnly && "RMD" == command) {
-            rmd(toLocalPath(commandParameters));
-        } else if (!readOnly && "DELE" == command) {
-            dele(toLocalPath(commandParameters));
-        } else if (!readOnly && "RNFR" == command) {
-            reply(350);
-        } else if (!readOnly && "RNTO" == command) {
-            rnto(toLocalPath(commandParameters));
-        } else if (!readOnly && "APPE" == command) {
-            stor(toLocalPath(commandParameters), true);
+    } else if ("PASV" == command) {
+        if (!isLoggedIn) {
+            reply(530);
         } else {
-            reply(502);
+            pasv();
+        }
+    } else if ("LIST" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            list(toLocalPath(stripFlagL(commandParameters)), false);
+        }
+    } else if ("RETR" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            retr(toLocalPath(commandParameters));
+        }
+    } else if ("REST" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            reply(350);
+        }
+    } else if ("NLST" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            list(toLocalPath(stripFlagL(commandParameters)), true);
+        }
+    } else if ("SIZE" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            size(toLocalPath(commandParameters));
+        }
+    } else if ("SYST" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            reply(215, "UNIX");
+        }
+    } else if ("PROT" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            prot(commandParameters.toUpper());
+        }
+    } else if ("CDUP" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            cdup();
+        }
+    } else if ("OPTS" == command && "UTF8 ON" == commandParameters.toUpper()) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            reply(200);
+        }
+    } else if ("PBSZ" == command && "0" == commandParameters.toUpper()) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            reply(200);
+        }
+    } else if ("NOOP" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else {
+            reply(200);
+        }
+    } else if ("STOR" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else if (readOnly) {
+            reply(550);
+        } else {
+            stor(toLocalPath(commandParameters));
+        }
+    } else if ("MKD" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else if (readOnly) {
+            reply(550);
+        } else {
+            mkd(toLocalPath(commandParameters));
+        }
+    } else if ("RMD" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else if (readOnly) {
+            reply(550);
+        } else {
+            rmd(toLocalPath(commandParameters));
+        }
+    } else if ("DELE" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else if (readOnly) {
+            reply(550);
+        } else {
+            dele(toLocalPath(commandParameters));
+        }
+    } else if ("RNFR" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else if (readOnly) {
+            reply(550);
+        } else {
+            reply(350);
+        }
+    } else if ("RNTO" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else if (readOnly) {
+            reply(550);
+        } else {
+            rnto(toLocalPath(commandParameters));
+        }
+    } else if ("APPE" == command) {
+        if (!isLoggedIn) {
+            reply(530);
+        } else if (readOnly) {
+            reply(550);
+        } else {
+            stor(toLocalPath(commandParameters), true);
         }
     } else {
-        reply(530);
+        reply(502);
     }
 
     lastProcessedCommand = entireCommand;
