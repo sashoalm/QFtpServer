@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QPointer>
 
-class QTcpServer;
 class QSslSocket;
 class FtpCommand;
 class PassiveDataConnection;
