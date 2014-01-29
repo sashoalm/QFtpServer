@@ -24,7 +24,18 @@ public:
 signals:
 
 private:
-    void incomingConnection(int socketDescriptor);
+    // Workaround so we support both Qt 5 and Qt 4.
+    // QTcpServer::incomingConnection(int handle) has been changed to
+    // QTcpServer::incomingConnection(qintptr handle) this 2nd one is sneaky as it
+    // compiles properly but no connections appear to arrive since the compiler
+    // doesn’t consider int and qintptr the same.
+#if QT_VERSION >= 0x050000
+    typedef qintptr PortableSocketDescriptorType;
+#else
+    typedef int PortableSocketDescriptorType;
+#endif
+
+    void incomingConnection(PortableSocketDescriptorType socketDescriptor);
 };
 
 #endif // SSLSERVER_H

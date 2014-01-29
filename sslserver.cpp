@@ -16,7 +16,7 @@ void SslServer::setLocalCertificateAndPrivateKey(QSslSocket *socket)
     Q_ASSERT(!socket->localCertificate().isNull());
 }
 
-void SslServer::incomingConnection(int socketDescriptor)
+void SslServer::incomingConnection(PortableSocketDescriptorType socketDescriptor)
 {
     QSslSocket *socket = new QSslSocket(this);
     if (socket->setSocketDescriptor(socketDescriptor)) {
