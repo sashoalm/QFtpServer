@@ -159,3 +159,8 @@ void MainWindow::on_pushButtonShowDebugLog_clicked()
     dlg->setModal(true);
     dlg->showExpanded();
 }
+
+void MainWindow::on_pushButtonExit_clicked()
+{
+    close();
+}
