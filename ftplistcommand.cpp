@@ -16,13 +16,13 @@ FtpListCommand::FtpListCommand(QObject *parent, const QString &fileName, bool na
 FtpListCommand::~FtpListCommand()
 {
     if (started) {
-        emit reply(226);
+        emit reply(226, "Closing data connection.");
     }
 }
 
 void FtpListCommand::startImplementation()
 {
-    emit reply(150);
+    emit reply(150, "File status okay; about to open data connection.");
 
     index = 0;
     list = new QFileInfoList;

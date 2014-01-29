@@ -25,7 +25,7 @@ signals:
 public slots:
     // Slot used by the data connection handlers to send messages to the FTP
     // client through the control connection.
-    void reply(int code, const QString &details = QString());
+    void reply(int code, const QString &details);
 
 private slots:
     // Handles any new data comming from the FTP client.

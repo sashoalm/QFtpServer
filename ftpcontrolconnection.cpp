@@ -30,7 +30,7 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QSslSocket *socket, 
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
     currentDirectory = "/";
     dataConnection = new PassiveDataConnection(this);
-    reply(220);
+    reply(220, "Welcome to QFtpServer.");
 }
 
 FtpControlConnection::~FtpControlConnection()
@@ -130,7 +130,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     parseCommand(entireCommand, &command, &commandParameters);
 
     if ("USER" == command) {
-        reply(331);
+        reply(331, "User name OK, need password.");
     } else if ("PASS" == command) {
         pass(commandParameters);
     } else if ("QUIT" == command) {
@@ -141,152 +141,152 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         feat();
     } else if ("PWD" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             reply(227, '"' + currentDirectory + '"');
         }
     } else if ("CWD" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             cwd(commandParameters);
         }
     } else if ("TYPE" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
-            reply(200);
+            reply(200, "Command okay.");
         }
     } else if ("PASV" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             pasv();
         }
     } else if ("LIST" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             list(toLocalPath(stripFlagL(commandParameters)), false);
         }
     } else if ("RETR" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             retr(toLocalPath(commandParameters));
         }
     } else if ("REST" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
-            reply(350);
+            reply(350, "Requested file action pending further information.");
         }
     } else if ("NLST" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             list(toLocalPath(stripFlagL(commandParameters)), true);
         }
     } else if ("SIZE" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             size(toLocalPath(commandParameters));
         }
     } else if ("SYST" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             reply(215, "UNIX");
         }
     } else if ("PROT" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             prot(commandParameters.toUpper());
         }
     } else if ("CDUP" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
             cdup();
         }
     } else if ("OPTS" == command && "UTF8 ON" == commandParameters.toUpper()) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
-            reply(200);
+            reply(200, "Command okay.");
         }
     } else if ("PBSZ" == command && "0" == commandParameters.toUpper()) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
-            reply(200);
+            reply(200, "Command okay.");
         }
     } else if ("NOOP" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else {
-            reply(200);
+            reply(200, "Command okay.");
         }
     } else if ("STOR" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else if (readOnly) {
-            reply(550);
+            reply(550, "Can't do that in read-only mode.");
         } else {
             stor(toLocalPath(commandParameters));
         }
     } else if ("MKD" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else if (readOnly) {
-            reply(550);
+            reply(550, "Can't do that in read-only mode.");
         } else {
             mkd(toLocalPath(commandParameters));
         }
     } else if ("RMD" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else if (readOnly) {
-            reply(550);
+            reply(550, "Can't do that in read-only mode.");
         } else {
             rmd(toLocalPath(commandParameters));
         }
     } else if ("DELE" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else if (readOnly) {
-            reply(550);
+            reply(550, "Can't do that in read-only mode.");
         } else {
             dele(toLocalPath(commandParameters));
         }
     } else if ("RNFR" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else if (readOnly) {
-            reply(550);
+            reply(550, "Can't do that in read-only mode.");
         } else {
-            reply(350);
+            reply(350, "Requested file action pending further information.");
         }
     } else if ("RNTO" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else if (readOnly) {
-            reply(550);
+            reply(550, "Can't do that in read-only mode.");
         } else {
             rnto(toLocalPath(commandParameters));
         }
     } else if ("APPE" == command) {
         if (!isLoggedIn) {
-            reply(530);
+            reply(530, "You must log in first.");
         } else if (readOnly) {
-            reply(550);
+            reply(550, "Can't do that in read-only mode.");
         } else {
             stor(toLocalPath(commandParameters), true);
         }
     } else {
-        reply(502);
+        reply(502, "Command not implemented.");
     }
 
     lastProcessedCommand = entireCommand;
@@ -298,7 +298,7 @@ void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
 
     if (!dataConnection->setFtpCommand(ftpCommand)) {
         delete ftpCommand;
-        reply(425);
+        reply(425, "Can't open data connection.");
         return;
     }
 }
@@ -334,36 +334,36 @@ void FtpControlConnection::cwd(const QString &dir)
         } else {
             currentDirectory = QDir::cleanPath(currentDirectory + '/' + dir);
         }
-        reply(250);
+        reply(250, "Requested file action okay, completed.");
     } else {
-        reply(550);
+        reply(550, "Requested action not taken; file unavailable.");
     }
 }
 
 void FtpControlConnection::mkd(const QString &dir)
 {
     if (QDir().mkdir(dir)) {
-        reply(257);
+        reply(257, '"' + dir + '"' + " created.");
     } else {
-        reply(550);
+        reply(550, "Requested action not taken; file unavailable.");
     }
 }
 
 void FtpControlConnection::rmd(const QString &dir)
 {
     if (QDir().rmdir(dir)) {
-        reply(250);
+        reply(250, "Requested file action okay, completed.");
     } else {
-        reply(550);
+        reply(550, "Requested action not taken; file unavailable.");
     }
 }
 
 void FtpControlConnection::dele(const QString &fileName)
 {
     if (QDir().remove(fileName)) {
-        reply(250);
+        reply(250, "Requested file action okay, completed.");
     } else {
-        reply(550);
+        reply(550, "Requested action not taken; file unavailable.");
     }
 }
 
@@ -373,15 +373,15 @@ void FtpControlConnection::rnto(const QString &fileName)
     QString commandParameters;
     parseCommand(lastProcessedCommand, &command, &commandParameters);
     if ("RNFR" == command && QDir().rename(toLocalPath(commandParameters), fileName)) {
-        reply(250);
+        reply(250, "Requested file action okay, completed.");
     } else {
-        reply(550);
+        reply(550, "Requested action not taken; file unavailable.");
     }
 }
 
 void FtpControlConnection::quit()
 {
-    reply(221);
+    reply(221, "Quitting...");
     // If we have a running download or upload, we will wait until it's
     // finished before closing the control connection.
     if (dataConnection->ftpCommand()) {
@@ -395,7 +395,7 @@ void FtpControlConnection::size(const QString &fileName)
 {
     QFileInfo fi(fileName);
     if (!fi.exists() || fi.isDir()) {
-        reply(550);
+        reply(550, "Requested action not taken; file unavailable.");
     } else {
         reply(213, QString("%1").arg(fi.size()));
     }
@@ -407,16 +407,16 @@ void FtpControlConnection::pass(const QString &password)
     QString commandParameters;
     parseCommand(lastProcessedCommand, &command, &commandParameters);
     if (this->password.isEmpty() || ("USER" == command && this->userName == commandParameters && this->password == password)) {
-        reply(230);
+        reply(230, "You are logged in.");
         isLoggedIn = true;
     } else {
-        reply(530);
+        reply(530, "User name or password was incorrect.");
     }
 }
 
 void FtpControlConnection::auth()
 {
-    reply(234);
+    reply(234, "Initializing SSL connection.");
     SslServer::setLocalCertificateAndPrivateKey(socket);
     socket->startServerEncryption();
 }
@@ -428,16 +428,16 @@ void FtpControlConnection::prot(const QString &protectionLevel)
     } else if ("P" == protectionLevel) {
         encryptDataConnection = true;
     } else {
-        reply(502);
+        reply(502, "Command not implemented.");
         return;
     }
-    reply(200);
+    reply(200, "Command okay.");
 }
 
 void FtpControlConnection::cdup()
 {
     if ("/" == currentDirectory) {
-        reply(250);
+        reply(250, "Requested file action okay, completed.");
     } else {
         cwd("..");
     }

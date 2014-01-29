@@ -16,9 +16,9 @@ FtpStorCommand::~FtpStorCommand()
 {
     if (started) {
         if (success) {
-            emit reply(226);
+            emit reply(226, "Closing data connection.");
         } else {
-            emit reply(451);
+            emit reply(451, "Requested action aborted: local error in processing.");
         }
     }
 }
@@ -31,7 +31,7 @@ void FtpStorCommand::startImplementation()
         return;
     }
     success = true;
-    emit reply(150);
+    emit reply(150, "File status okay; about to open data connection.");
     if (seekTo) {
         file->seek(seekTo);
     }
