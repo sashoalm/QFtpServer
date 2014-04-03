@@ -14,6 +14,15 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Fix for the bug android keyboard bug - see
+    // http://stackoverflow.com/q/21074012/492336.
+    foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {
+        connect(lineEdit, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
+    }
+    foreach (QSpinBox *spinBox, findChildren<QSpinBox*>()) {
+        connect(spinBox, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
+    }
+
     loadSettings();
     server = 0;
     startServer();
