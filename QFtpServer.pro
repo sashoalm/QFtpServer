@@ -57,4 +57,7 @@ RESOURCES += \
 
 OTHER_FILES += \
     privkey.pem \
-    cacert.pem
+    cacert.pem \
+    android/AndroidManifest.xml
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
