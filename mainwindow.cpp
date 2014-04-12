@@ -14,15 +14,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->lineEditPort->setValidator(new QIntValidator(1, 65535, this));
+
 #if defined(Q_OS_ANDROID)
     // Fix for the bug android keyboard bug - see
     // http://stackoverflow.com/q/21074012/492336.
     foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {
         connect(lineEdit, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
-    }
-
-    foreach (QSpinBox *spinBox, findChildren<QSpinBox*>()) {
-        connect(spinBox, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
     }
 #else
     // The exit button is needed only for Android. Hide it for other builds.
@@ -98,7 +96,7 @@ void MainWindow::showExpanded()
 void MainWindow::loadSettings()
 {
     QSettings settings;
-    ui->spinBoxPort->setValue(settings.value("settings/port", 21).toInt());
+    ui->lineEditPort->setText(settings.value("settings/port", 21).toString());
     ui->lineEditUserName->setText(settings.value("settings/username", "admin").toString());
     ui->lineEditPassword->setText(settings.value("settings/password", "qt").toString());
     ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
@@ -110,7 +108,7 @@ void MainWindow::loadSettings()
 void MainWindow::saveSettings()
 {
     QSettings settings;
-    settings.setValue("settings/port", ui->spinBoxPort->value());
+    settings.setValue("settings/port", ui->lineEditPort->text());
     settings.setValue("settings/username", ui->lineEditUserName->text());
     settings.setValue("settings/password", ui->lineEditPassword->text());
     settings.setValue("settings/rootpath", ui->lineEditRootPath->text());
@@ -128,7 +126,7 @@ void MainWindow::startServer()
         password = ui->lineEditPassword->text();
     }
     delete server;
-    server = new FtpServer(this, ui->lineEditRootPath->text(), ui->spinBoxPort->value(), userName,
+    server = new FtpServer(this, ui->lineEditRootPath->text(), ui->lineEditPort->text().toInt(), userName,
                            password, ui->checkBoxReadOnly->isChecked(), ui->checkBoxOnlyOneIpAllowed->isChecked());
     connect(server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
     if (server->isListening()) {
