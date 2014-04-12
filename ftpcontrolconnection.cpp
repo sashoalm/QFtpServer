@@ -92,6 +92,8 @@ QString FtpControlConnection::toLocalPath(const QString &fileName) const
     }
 
     // Evaluate all the ".." and ".", "/path/././to/dir/../.." becomes "/path".
+    // Note we do this **before** prepending the root path, in order to avoid
+    // "jailbreaking" out of the "chroot".
     QStringList components;
     foreach (const QString &component, localPath.split('/', QString::SkipEmptyParts)) {
         if (component == "..") {
