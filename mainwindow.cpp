@@ -14,14 +14,20 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+#if defined(Q_OS_ANDROID)
     // Fix for the bug android keyboard bug - see
     // http://stackoverflow.com/q/21074012/492336.
     foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {
         connect(lineEdit, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
     }
+
     foreach (QSpinBox *spinBox, findChildren<QSpinBox*>()) {
         connect(spinBox, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
     }
+#else
+    // The exit button is needed only for Android. Hide it for other builds.
+    ui->pushButtonExit->hide();
+#endif // Q_OS_ANDROID
 
     loadSettings();
     server = 0;
