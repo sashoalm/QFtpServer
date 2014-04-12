@@ -25,11 +25,11 @@ bool FtpServer::isListening()
 
 void FtpServer::startNewControlConnection()
 {
-    qDebug() << "FtpServer::acceptConnection";
     QSslSocket *socket = (QSslSocket *) server->nextPendingConnection();
 
     // If this is not a previously encountered IP emit the newPeerIp signal.
     QString peerIp = socket->peerAddress().toString();
+    qDebug() << "connection from" << peerIp;
     if (!encounteredIps.contains(peerIp)) {
         // If we don't allow more than one IP for the client, we close
         // that connection.

@@ -106,13 +106,13 @@ QString FtpControlConnection::toLocalPath(const QString &fileName) const
     // Prepend the root path.
     localPath = QDir::cleanPath(rootPath + '/' + components.join("/"));
 
-    qDebug() << "FtpControlConnection::toLocalPath" << fileName << "->" << localPath;
+    qDebug() << "to local path" << fileName << "->" << localPath;
     return localPath;
 }
 
 void FtpControlConnection::reply(int code, const QString &details)
 {
-    qDebug() << "FtpControlConnection::reply" << code << details;
+    qDebug() << "reply" << code << details;
 
     if (details.isEmpty()) {
         Q_ASSERT(false);
@@ -124,7 +124,7 @@ void FtpControlConnection::reply(int code, const QString &details)
 
 void FtpControlConnection::processCommand(const QString &entireCommand)
 {
-    qDebug() << "FtpControlConnection::processCommand" << entireCommand;
+    qDebug() << "command" << entireCommand;
 
     QString command;
     QString commandParameters;
