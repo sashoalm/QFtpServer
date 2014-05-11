@@ -22,6 +22,14 @@ FtpListCommand::~FtpListCommand()
 
 void FtpListCommand::startImplementation()
 {
+    QFileInfo info(listDirectory);
+
+    if (!info.isReadable()) {
+        emit reply(425, "File or directory is not readable or doesn't exist.");
+        socket->disconnectFromHost();
+        return;
+    }
+
     emit reply(150, "File status okay; about to open data connection.");
 
     index = 0;
