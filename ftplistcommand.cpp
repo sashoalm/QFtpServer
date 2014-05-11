@@ -34,7 +34,11 @@ void FtpListCommand::startImplementation()
 
     index = 0;
     list = new QFileInfoList;
-    *list = QDir(listDirectory).entryInfoList();
+    if (!info.isDir()) {
+        *list = (QFileInfoList() << info);
+    } else {
+        *list = QDir(listDirectory).entryInfoList();
+    }
 
     // Start the timer.
     timer = new QTimer(this);
