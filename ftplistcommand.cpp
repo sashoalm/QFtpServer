@@ -100,7 +100,11 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
         // Last modified - note we **must** use english locale, otherwise FTP clients won't understand us.
         QLocale locale(QLocale::English);
         QDateTime lm = fi.lastModified();
-        line += ' ' + locale.toString(lm.date(), "MMM dd") + ' ' + locale.toString(lm.time(), "hh:mm");
+        if (lm.date().year() != QDate::currentDate().year()) {
+            line += ' ' + locale.toString(lm.date(), "MMM dd  yyyy");
+        } else {
+            line += ' ' + locale.toString(lm.date(), "MMM dd") + ' ' + locale.toString(lm.time(), "hh:mm");
+        }
     }
     line += ' ' + fi.fileName();
     line += "\r\n";
