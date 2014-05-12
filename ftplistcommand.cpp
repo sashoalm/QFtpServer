@@ -46,6 +46,14 @@ void FtpListCommand::startImplementation()
     timer->start(0);
 }
 
+QString padded(QString s, int n)
+{
+    while (s.size() < n) {
+        s = ' ' + s;
+    }
+    return s;
+}
+
 QString FtpListCommand::fileListingString(const QFileInfo &fi)
 {
     // This is how the returned list looks. It is like what is returned by
@@ -84,15 +92,15 @@ QString FtpListCommand::fileListingString(const QFileInfo &fi)
         if (group.isEmpty()) {
             group = "unknown";
         }
-        line += ' ' + owner + ' ' + group;
+        line += ' ' + padded(owner, 10) + ' ' + padded(group, 10);
 
         // File size.
-        line += ' ' + QString::number(fi.size());
+        line += ' ' + padded(QString::number(fi.size()), 14);
 
         // Last modified - note we **must** use english locale, otherwise FTP clients won't understand us.
         QLocale locale(QLocale::English);
         QDateTime lm = fi.lastModified();
-        line += ' ' + locale.toString(lm.date(), "MMM d") + ' ' + locale.toString(lm.time(), "hh:mm");
+        line += ' ' + locale.toString(lm.date(), "MMM dd") + ' ' + locale.toString(lm.time(), "hh:mm");
     }
     line += ' ' + fi.fileName();
     line += "\r\n";
