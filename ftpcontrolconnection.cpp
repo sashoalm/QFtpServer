@@ -146,7 +146,7 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         if (!isLoggedIn) {
             reply(530, "You must log in first.");
         } else {
-            reply(227, '"' + currentDirectory + '"');
+            reply(257, '"' + currentDirectory + '"');
         }
     } else if ("CWD" == command) {
         if (!isLoggedIn) {
