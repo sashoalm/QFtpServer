@@ -14,9 +14,9 @@ FtpRetrCommand::~FtpRetrCommand()
 {
     if (started) {
         if (file && file->isOpen() && file->atEnd()) {
-            emit reply(226, "Closing data connection.");
+            emit reply("226 Closing data connection.");
         } else {
-            emit reply(550, "Requested action not taken; file unavailable.");
+            emit reply("550 Requested action not taken; file unavailable.");
         }
     }
 }
@@ -28,7 +28,7 @@ void FtpRetrCommand::startImplementation()
         deleteLater();
         return;
     }
-    emit reply(150, "File status okay; about to open data connection.");
+    emit reply("150 File status okay; about to open data connection.");
     if (seekTo) {
         file->seek(seekTo);
     }

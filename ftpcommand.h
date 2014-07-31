@@ -14,7 +14,7 @@ public:
     explicit FtpCommand(QObject *parent = 0);
 
 signals:
-    void reply(int code, const QString &details);
+    void reply(const QString &details);
 
 public:
     void start(QSslSocket *socket);

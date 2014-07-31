@@ -16,7 +16,7 @@ FtpListCommand::FtpListCommand(QObject *parent, const QString &fileName, bool na
 FtpListCommand::~FtpListCommand()
 {
     if (started) {
-        emit reply(226, "Closing data connection.");
+        emit reply("226 Closing data connection.");
     }
 }
 
@@ -25,12 +25,12 @@ void FtpListCommand::startImplementation()
     QFileInfo info(listDirectory);
 
     if (!info.isReadable()) {
-        emit reply(425, "File or directory is not readable or doesn't exist.");
+        emit reply("425 File or directory is not readable or doesn't exist.");
         socket->disconnectFromHost();
         return;
     }
 
-    emit reply(150, "File status okay; about to open data connection.");
+    emit reply("150 File status okay; about to open data connection.");
 
     index = 0;
     list = new QFileInfoList;
