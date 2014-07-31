@@ -309,7 +309,7 @@ void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
 void FtpControlConnection::pasv()
 {
     int port = dataConnection->listen(encryptDataConnection);
-    reply(227, QString("Entering Passive Mode. %1,%2,%3").arg(socket->localAddress().toString().replace('.',',')).arg(port/256).arg(port%256));
+    reply(227, QString("Entering Passive Mode (%1,%2,%3).").arg(socket->localAddress().toString().replace('.',',')).arg(port/256).arg(port%256));
 }
 
 void FtpControlConnection::list(const QString &dir, bool nameListOnly)
