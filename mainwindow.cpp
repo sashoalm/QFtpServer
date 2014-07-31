@@ -27,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButtonExit->hide();
 #endif // Q_OS_ANDROID
 
+    // Set window icon.
+    setWindowIcon(QIcon(":/icons/appicon"));
+
     loadSettings();
     server = 0;
     startServer();
