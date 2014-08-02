@@ -154,6 +154,12 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         } else {
             reply("200 Command okay.");
         }
+    } else if ("PORT" == command) {
+        if (!isLoggedIn) {
+            reply("530 You must log in first.");
+        } else {
+            port(commandParameters);
+        }
     } else if ("PASV" == command) {
         if (!isLoggedIn) {
             reply("530 You must log in first.");
@@ -298,6 +304,20 @@ void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
         reply("425 Can't open data connection.");
         return;
     }
+}
+
+void FtpControlConnection::port(const QString &addressAndPort)
+{
+    // Example PORT command:
+    // PORT h1,h2,h3,h4,p1,p2
+
+    // Get IP and port.
+    QRegExp exp("\\s*(\\d+,\\d+,\\d+,\\d+),(\\d+),(\\d+)");
+    exp.indexIn(addressAndPort);
+    QString hostName = exp.cap(1).replace(',', '.');
+    int port = exp.cap(2).toInt() * 256 + exp.cap(3).toInt();
+    dataConnection->scheduleConnectToHost(hostName, port, encryptDataConnection);
+    reply("200 Command okay.");
 }
 
 void FtpControlConnection::pasv()

@@ -51,6 +51,8 @@ private:
     // Parses and executes a single command (for example "CD /path/to/dir").
     void processCommand(const QString &entireCommand);
     void startOrScheduleCommand(FtpCommand *ftpCommand);
+    // Open a new active data connection.
+    void port(const QString &addressAndPort);
     // Open a new passive data connection.
     void pasv();
     // List directory contents. Equivalent to 'ls' in UNIX, or 'dir' in DOS.

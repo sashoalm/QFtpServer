@@ -24,6 +24,10 @@ class PassiveDataConnection : public QObject
 public:
     explicit PassiveDataConnection(QObject *parent = 0);
 
+    // Connects to a host. Any existing data connections
+    // or commands are aborted.
+    void scheduleConnectToHost(const QString &hostName, int port, bool encrypt);
+
     // Starts listening for new data connections. Any existing data connections
     // or commands are aborted.
     int listen(bool encrypt);
@@ -41,6 +45,7 @@ signals:
 private slots:
     void newConnection();
     void encrypted();
+    void connected();
 
 private:
     void startFtpCommand();
@@ -50,6 +55,11 @@ private:
     bool isSocketReady;
     bool isWaitingForFtpCommand;
     bool encrypt;
+
+    // Used for the active data connection (PORT command).
+    bool isActiveConnection;
+    QString hostName;
+    int port;
 };
 
 #endif // PASSIVEDATACONNECTION_H

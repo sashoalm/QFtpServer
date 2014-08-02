@@ -13,6 +13,17 @@ PassiveDataConnection::PassiveDataConnection(QObject *parent) :
     isWaitingForFtpCommand = false;
 }
 
+void PassiveDataConnection::scheduleConnectToHost(const QString &hostName, int port, bool encrypt)
+{
+    this->encrypt = encrypt;
+    delete socket;
+    this->hostName = hostName;
+    this->port = port;
+    isSocketReady = false;
+    isWaitingForFtpCommand = true;
+    isActiveConnection = true;
+}
+
 int PassiveDataConnection::listen(bool encrypt)
 {
     this->encrypt = encrypt;
@@ -22,6 +33,7 @@ int PassiveDataConnection::listen(bool encrypt)
     command = 0;
     isSocketReady = false;
     isWaitingForFtpCommand = true;
+    isActiveConnection = false;
     server->close();
     server->listen();
     return server->serverPort();
@@ -35,7 +47,14 @@ bool PassiveDataConnection::setFtpCommand(FtpCommand *command)
     isWaitingForFtpCommand = false;
     this->command = command;
     command->setParent(this);
-    startFtpCommand();
+
+    if (isActiveConnection) {
+        socket = new QSslSocket(this);
+        connect(socket, SIGNAL(connected()), SLOT(connected()));
+        socket->connectToHost(hostName, port);
+    } else {
+        startFtpCommand();
+    }
     return true;
 }
 
@@ -64,6 +83,17 @@ void PassiveDataConnection::encrypted()
 {
     isSocketReady = true;
     startFtpCommand();
+}
+
+void PassiveDataConnection::connected()
+{
+    if (encrypt) {
+        connect(socket, SIGNAL(encrypted()), this, SLOT(encrypted()));
+        SslServer::setLocalCertificateAndPrivateKey(socket);
+        socket->startServerEncryption();
+    } else {
+        encrypted();
+    }
 }
 
 void PassiveDataConnection::startFtpCommand()
