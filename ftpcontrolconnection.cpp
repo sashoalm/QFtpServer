@@ -3,7 +3,7 @@
 #include "ftpretrcommand.h"
 #include "ftpstorcommand.h"
 #include "sslserver.h"
-#include "passivedataconnection.h"
+#include "dataconnection.h"
 
 #include <QFileInfo>
 #include <QDateTime>
@@ -29,7 +29,7 @@ FtpControlConnection::FtpControlConnection(QObject *parent, QSslSocket *socket, 
     connect(socket, SIGNAL(readyRead()), this, SLOT(acceptNewData()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
     currentDirectory = "/";
-    dataConnection = new PassiveDataConnection(this);
+    dataConnection = new DataConnection(this);
     reply("220 Welcome to QFtpServer.");
 }
 

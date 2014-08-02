@@ -30,8 +30,8 @@ SOURCES += main.cpp mainwindow.cpp \
     ftpretrcommand.cpp \
     ftplistcommand.cpp \
     ftpcommand.cpp \
-    passivedataconnection.cpp \
-    debuglogdialog.cpp
+    debuglogdialog.cpp \
+    dataconnection.cpp
 HEADERS += mainwindow.h \
     ftpserver.h \
     ftpcontrolconnection.h \
@@ -40,8 +40,8 @@ HEADERS += mainwindow.h \
     ftpretrcommand.h \
     ftplistcommand.h \
     ftpcommand.h \
-    passivedataconnection.h \
-    debuglogdialog.h
+    debuglogdialog.h \
+    dataconnection.h
 FORMS += mainwindow.ui \
     debuglogdialog.ui
 QT += network

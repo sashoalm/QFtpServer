@@ -1,9 +1,9 @@
-#include "passivedataconnection.h"
+#include "dataconnection.h"
 #include "sslserver.h"
 #include "ftpcommand.h"
 #include <QSslSocket>
 
-PassiveDataConnection::PassiveDataConnection(QObject *parent) :
+DataConnection::DataConnection(QObject *parent) :
     QObject(parent)
 {
     server = new SslServer(this);
@@ -13,7 +13,7 @@ PassiveDataConnection::PassiveDataConnection(QObject *parent) :
     isWaitingForFtpCommand = false;
 }
 
-void PassiveDataConnection::scheduleConnectToHost(const QString &hostName, int port, bool encrypt)
+void DataConnection::scheduleConnectToHost(const QString &hostName, int port, bool encrypt)
 {
     this->encrypt = encrypt;
     delete socket;
@@ -24,7 +24,7 @@ void PassiveDataConnection::scheduleConnectToHost(const QString &hostName, int p
     isActiveConnection = true;
 }
 
-int PassiveDataConnection::listen(bool encrypt)
+int DataConnection::listen(bool encrypt)
 {
     this->encrypt = encrypt;
     delete socket;
@@ -39,7 +39,7 @@ int PassiveDataConnection::listen(bool encrypt)
     return server->serverPort();
 }
 
-bool PassiveDataConnection::setFtpCommand(FtpCommand *command)
+bool DataConnection::setFtpCommand(FtpCommand *command)
 {
     if (!isWaitingForFtpCommand) {
         return false;
@@ -58,7 +58,7 @@ bool PassiveDataConnection::setFtpCommand(FtpCommand *command)
     return true;
 }
 
-FtpCommand *PassiveDataConnection::ftpCommand()
+FtpCommand *DataConnection::ftpCommand()
 {
     if (isSocketReady) {
         return command;
@@ -66,7 +66,7 @@ FtpCommand *PassiveDataConnection::ftpCommand()
     return 0;
 }
 
-void PassiveDataConnection::newConnection()
+void DataConnection::newConnection()
 {
     socket = (QSslSocket *) server->nextPendingConnection();
     server->close();
@@ -79,13 +79,13 @@ void PassiveDataConnection::newConnection()
     }
 }
 
-void PassiveDataConnection::encrypted()
+void DataConnection::encrypted()
 {
     isSocketReady = true;
     startFtpCommand();
 }
 
-void PassiveDataConnection::connected()
+void DataConnection::connected()
 {
     if (encrypt) {
         connect(socket, SIGNAL(encrypted()), this, SLOT(encrypted()));
@@ -96,7 +96,7 @@ void PassiveDataConnection::connected()
     }
 }
 
-void PassiveDataConnection::startFtpCommand()
+void DataConnection::startFtpCommand()
 {
     if (command && isSocketReady) {
         command->start(socket);

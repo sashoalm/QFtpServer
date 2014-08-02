@@ -6,7 +6,7 @@
 
 class QSslSocket;
 class FtpCommand;
-class PassiveDataConnection;
+class DataConnection;
 
 // Implements the ftp control connection. Reads the ftp commands from the
 // control connection socket, parses each line and maps it to an implemented
@@ -105,7 +105,7 @@ private:
     QString rootPath;
     // Flag for whether we should encrypt data connections.
     bool encryptDataConnection;
-    PassiveDataConnection *dataConnection;
+    DataConnection *dataConnection;
     // Flag whether the client is allowed only read-only access (can download,
     // but not upload/modify).
     bool readOnly;

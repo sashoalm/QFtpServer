@@ -8,21 +8,21 @@ class FtpCommand;
 #include <QObject>
 #include <QPointer>
 
-// This class encapsulates the logic of the creation of the passive data
-// connections. In short - there can be only one passive data connection per
+// This class encapsulates the logic of the creation of both passive and active
+// data connections. In short - there can be only one data connection per
 // control connection. If a new one is requested while there is one being used
-// currently, the operation using it is aborted. A new passive connection
-// starts when a PASV command is issued. Then the user must specify a command
-// that uses it, before or after he connects to the listening server. If we
-// have encryption enabled, the data connection is also first encrypted. Once
-// we have the command, and client has connected to us and the connection has
+// currently, the operation using it is aborted. A new data connection starts
+// when a PASV or PORT command is issued. Then the user must specify a command
+// that uses the data connection, such as LIST or RETR/STOR. If we have
+// encryption enabled, the data connection is also first encrypted. Once we
+// have the command, and are connected to the client, and the connection has
 // been encrypted, we run the command.
 
-class PassiveDataConnection : public QObject
+class DataConnection : public QObject
 {
     Q_OBJECT
 public:
-    explicit PassiveDataConnection(QObject *parent = 0);
+    explicit DataConnection(QObject *parent = 0);
 
     // Connects to a host. Any existing data connections
     // or commands are aborted.
