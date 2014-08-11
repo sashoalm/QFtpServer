@@ -40,5 +40,10 @@ void FtpStorCommand::startImplementation()
 
 void FtpStorCommand::acceptNextBlock()
 {
-    file->write(socket->readAll());
+    const QByteArray &bytes = socket->readAll();
+    int bytesWritten = file->write(bytes);
+    if (bytesWritten != bytes.size()) {
+        emit reply("451 Requested action aborted. Could not write data to file.");
+        deleteLater();
+    }
 }
