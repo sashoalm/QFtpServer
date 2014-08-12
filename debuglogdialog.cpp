@@ -88,9 +88,9 @@ void DebugLogDialog::setOrientation(ScreenOrientation orientation)
 
 void DebugLogDialog::showExpanded()
 {
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR) || defined (Q_OS_ANDROID)
+#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR)
     showFullScreen();
-#elif defined(Q_WS_MAEMO_5)
+#elif defined(Q_WS_MAEMO_5) || defined (Q_OS_ANDROID)
     showMaximized();
 #else
     show();
