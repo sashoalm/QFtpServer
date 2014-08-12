@@ -98,8 +98,17 @@ void MainWindow::showExpanded()
 
 void MainWindow::loadSettings()
 {
+    // UNIX-derived systems such as Linux and Android don't allow access to
+    // port 21 for non-root programs, so we will use port 2121 instead.
+    QString defaultPort;
+#if defined(Q_OS_UNIX)
+    defaultPort = "2121";
+#else
+    defaultPort = "21";
+#endif
+
     QSettings settings;
-    ui->lineEditPort->setText(settings.value("settings/port", 21).toString());
+    ui->lineEditPort->setText(settings.value("settings/port", defaultPort).toString());
     ui->lineEditUserName->setText(settings.value("settings/username", "admin").toString());
     ui->lineEditPassword->setText(settings.value("settings/password", "qt").toString());
     ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
