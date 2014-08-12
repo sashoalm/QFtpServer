@@ -9,7 +9,14 @@ FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const Q
     QObject(parent)
 {
     server = new SslServer(this);
+    // In Qt4, QHostAddress::Any listens for IPv4 connections only, but as of
+    // Qt5, it now listens on all available interfaces, and
+    // QHostAddress::AnyIPv4 needs to be used if we want only IPv4 connections.
+#if QT_VERSION >= 0x050000
+    server->listen(QHostAddress::AnyIPv4, port);
+#else
     server->listen(QHostAddress::Any, port);
+#endif
     connect(server, SIGNAL(newConnection()), this, SLOT(startNewControlConnection()));
     this->userName = userName;
     this->password = password;
