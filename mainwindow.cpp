@@ -165,7 +165,23 @@ void MainWindow::on_pushButtonRestartServer_clicked()
 
 void MainWindow::on_toolButtonBrowse_clicked()
 {
-    QString rootPath = QFileDialog::getExistingDirectory(this, QString(), ui->lineEditRootPath->text());
+    QString rootPath;
+#ifdef Q_OS_ANDROID
+    // In Android, the file dialog is not shown maximized by the static
+    // function, which looks weird, since the dialog doesn't have borders or
+    // anything. To make sure it's shown maximized, we won't be using
+    // QFileDialog::getExistingDirectory().
+    QFileDialog dialog;
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.showMaximized();
+    dialog.exec();
+    if (!dialog.selectedFiles().isEmpty()) {
+        rootPath = dialog.selectedFiles().front();
+    }
+#else
+    rootPath = QFileDialog::getExistingDirectory(this, QString(), ui->lineEditRootPath->text());
+#endif
     if (rootPath.isEmpty()) {
         return;
     }
