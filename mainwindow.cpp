@@ -22,6 +22,16 @@ MainWindow::MainWindow(QWidget *parent)
     foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {
         connect(lineEdit, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
     }
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)) && (QT_VERSION < QT_VERSION_CHECK(5, 3, 0))
+    // Fix for bug in Qt 5.2 - Virtual keyboard keeps switching to
+    // uppercase when I type in a QLineEdit, see
+    // http://stackoverflow.com/q/25263561/492336.
+    // The bug is fixed in Qt 5.4, I don't know about Qt 5.3.
+    foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {
+        lineEdit->setInputMethodHints(Qt::ImhNoAutoUppercase);
+    }
+#endif
 #else
     // The exit button is needed only for Android. Hide it for other builds.
     ui->pushButtonExit->hide();
