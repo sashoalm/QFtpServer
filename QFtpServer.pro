@@ -1,5 +1,7 @@
 TEMPLATE = subdirs
 SUBDIRS += QFtpServer \
-    QFtpServerLib
+    QFtpServerLib \
+    QFtpServerCommandLine
 
 QFtpServer.depends = QFtpServerLib
+QFtpServerCommandLine.depends = QFtpServerLib
