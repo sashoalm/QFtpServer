@@ -55,6 +55,28 @@ void FtpControlConnection::disconnectFromHost()
     socket->disconnectFromHost();
 }
 
+bool FtpControlConnection::verifyAuthentication(const QString &command)
+{
+    if (isLoggedIn) {
+        return true;
+    }
+
+    const char *commandsRequiringAuth[] = {
+        "PWD", "CWD", "TYPE", "PORT", "PASV", "LIST", "RETR", "REST",
+        "NLST", "SIZE", "SYST", "PROT", "CDUP", "OPTS", "PBSZ", "NOOP",
+        "STOR", "MKD", "RMD", "DELE", "RNFR", "RNTO", "APPE"
+    };
+
+    for (size_t ii = 0; ii < sizeof(commandsRequiringAuth)/sizeof(commandsRequiringAuth[0]); ++ii) {
+        if (command == commandsRequiringAuth[ii]) {
+            reply("530 You must log in first.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 QString FtpControlConnection::stripFlagL(const QString &fileName)
 {
     QString a = fileName.toUpper();
@@ -126,6 +148,10 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     QString commandParameters;
     parseCommand(entireCommand, &command, &commandParameters);
 
+    if (!verifyAuthentication(command)) {
+        return;
+    }
+
     if ("USER" == command) {
         reply("331 User name OK, need password.");
     } else if ("PASS" == command) {
@@ -137,153 +163,75 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     } else if ("FEAT" == command) {
         feat();
     } else if ("PWD" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            reply(QString("257 \"%1\"").arg(currentDirectory));
-        }
+        reply(QString("257 \"%1\"").arg(currentDirectory));
     } else if ("CWD" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            cwd(commandParameters);
-        }
+        cwd(commandParameters);
     } else if ("TYPE" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            reply("200 Command okay.");
-        }
+        reply("200 Command okay.");
     } else if ("PORT" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            port(commandParameters);
-        }
+        port(commandParameters);
     } else if ("PASV" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            pasv();
-        }
+        pasv();
     } else if ("LIST" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            list(toLocalPath(stripFlagL(commandParameters)), false);
-        }
+        list(toLocalPath(stripFlagL(commandParameters)), false);
     } else if ("RETR" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            retr(toLocalPath(commandParameters));
-        }
+        retr(toLocalPath(commandParameters));
     } else if ("REST" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            reply("350 Requested file action pending further information.");
-        }
+        reply("350 Requested file action pending further information.");
     } else if ("NLST" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            list(toLocalPath(stripFlagL(commandParameters)), true);
-        }
+        list(toLocalPath(stripFlagL(commandParameters)), true);
     } else if ("SIZE" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            size(toLocalPath(commandParameters));
-        }
+        size(toLocalPath(commandParameters));
     } else if ("SYST" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            reply("215 UNIX");
-        }
+        reply("215 UNIX");
     } else if ("PROT" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            prot(commandParameters.toUpper());
-        }
+        prot(commandParameters.toUpper());
     } else if ("CDUP" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            cdup();
-        }
+        cdup();
     } else if ("OPTS" == command && "UTF8 ON" == commandParameters.toUpper()) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            reply("200 Command okay.");
-        }
+        reply("200 Command okay.");
     } else if ("PBSZ" == command && "0" == commandParameters.toUpper()) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            reply("200 Command okay.");
-        }
+        reply("200 Command okay.");
     } else if ("NOOP" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else {
-            reply("200 Command okay.");
-        }
+        reply("200 Command okay.");
     } else if ("STOR" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else if (readOnly) {
+        if (readOnly) {
             reply("550 Can't do that in read-only mode.");
         } else {
             stor(toLocalPath(commandParameters));
         }
     } else if ("MKD" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else if (readOnly) {
+        if (readOnly) {
             reply("550 Can't do that in read-only mode.");
         } else {
             mkd(toLocalPath(commandParameters));
         }
     } else if ("RMD" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else if (readOnly) {
+        if (readOnly) {
             reply("550 Can't do that in read-only mode.");
         } else {
             rmd(toLocalPath(commandParameters));
         }
     } else if ("DELE" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else if (readOnly) {
+        if (readOnly) {
             reply("550 Can't do that in read-only mode.");
         } else {
             dele(toLocalPath(commandParameters));
         }
     } else if ("RNFR" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else if (readOnly) {
+        if (readOnly) {
             reply("550 Can't do that in read-only mode.");
         } else {
             reply("350 Requested file action pending further information.");
         }
     } else if ("RNTO" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else if (readOnly) {
+        if (readOnly) {
             reply("550 Can't do that in read-only mode.");
         } else {
             rnto(toLocalPath(commandParameters));
         }
     } else if ("APPE" == command) {
-        if (!isLoggedIn) {
-            reply("530 You must log in first.");
-        } else if (readOnly) {
+        if (readOnly) {
             reply("550 Can't do that in read-only mode.");
         } else {
             stor(toLocalPath(commandParameters), true);

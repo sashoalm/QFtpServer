@@ -34,6 +34,9 @@ private slots:
     void disconnectFromHost();
 
 private:
+    // Verify authentication for commands that require it. Returns true
+    // if user logged in or if command doesn't require it.
+    bool verifyAuthentication(const QString &command);
     // Workaround for some clients that will send "LIST -L" or "NLST -L", which
     // causes our server to take "-L" for a filename, and fail to produce a
     // listing. See http://stackoverflow.com/q/21065113/492336. This function
