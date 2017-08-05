@@ -77,6 +77,26 @@ bool FtpControlConnection::verifyAuthentication(const QString &command)
     return true;
 }
 
+bool FtpControlConnection::verifyWritePermission(const QString &command)
+{
+    if (!readOnly) {
+        return true;
+    }
+
+    const char *commandsRequiringWritePermission[] = {
+        "STOR", "MKD", "RMD", "DELE", "RNFR", "RNTO", "APPE"
+    };
+
+    for (size_t ii = 0; ii < sizeof(commandsRequiringWritePermission)/sizeof(commandsRequiringWritePermission[0]); ++ii) {
+        if (command == commandsRequiringWritePermission[ii]) {
+            reply("550 Can't do that in read-only mode.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 QString FtpControlConnection::stripFlagL(const QString &fileName)
 {
     QString a = fileName.toUpper();
@@ -152,6 +172,10 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
         return;
     }
 
+    if (!verifyWritePermission(command)) {
+        return;
+    }
+
     if ("USER" == command) {
         reply("331 User name OK, need password.");
     } else if ("PASS" == command) {
@@ -195,47 +219,19 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     } else if ("NOOP" == command) {
         reply("200 Command okay.");
     } else if ("STOR" == command) {
-        if (readOnly) {
-            reply("550 Can't do that in read-only mode.");
-        } else {
-            stor(toLocalPath(commandParameters));
-        }
+        stor(toLocalPath(commandParameters));
     } else if ("MKD" == command) {
-        if (readOnly) {
-            reply("550 Can't do that in read-only mode.");
-        } else {
-            mkd(toLocalPath(commandParameters));
-        }
+        mkd(toLocalPath(commandParameters));
     } else if ("RMD" == command) {
-        if (readOnly) {
-            reply("550 Can't do that in read-only mode.");
-        } else {
-            rmd(toLocalPath(commandParameters));
-        }
+        rmd(toLocalPath(commandParameters));
     } else if ("DELE" == command) {
-        if (readOnly) {
-            reply("550 Can't do that in read-only mode.");
-        } else {
-            dele(toLocalPath(commandParameters));
-        }
+        dele(toLocalPath(commandParameters));
     } else if ("RNFR" == command) {
-        if (readOnly) {
-            reply("550 Can't do that in read-only mode.");
-        } else {
-            reply("350 Requested file action pending further information.");
-        }
+        reply("350 Requested file action pending further information.");
     } else if ("RNTO" == command) {
-        if (readOnly) {
-            reply("550 Can't do that in read-only mode.");
-        } else {
-            rnto(toLocalPath(commandParameters));
-        }
+        rnto(toLocalPath(commandParameters));
     } else if ("APPE" == command) {
-        if (readOnly) {
-            reply("550 Can't do that in read-only mode.");
-        } else {
-            stor(toLocalPath(commandParameters), true);
-        }
+        stor(toLocalPath(commandParameters), true);
     } else {
         reply("502 Command not implemented.");
     }
