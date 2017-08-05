@@ -46,8 +46,7 @@ OTHER_FILES += \
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
-DISTFILES += \
-    README
+DISTFILES +=
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../QFtpServerLib/release/ -lQFtpServerLib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../QFtpServerLib/debug/ -lQFtpServerLib
