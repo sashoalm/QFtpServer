@@ -23,6 +23,9 @@ public:
     // priviledges (on Linux).
     bool isListening();
 
+    // Get the LAN IP of the host, e.g. "192.168.1.10".
+    static QString lanIp();
+
 signals:
     // A connection from a new IP has been established. This signal is emitted
     // when the FTP server is connected by a new IP. The new IP will then be

@@ -52,9 +52,6 @@ private:
 
     // Restart the FTP server.
     void startServer();
-
-    // Get the LAN IP of the host, e.g. "192.168.1.10".
-    QString lanIp();
 };
 
 #endif // MAINWINDOW_H

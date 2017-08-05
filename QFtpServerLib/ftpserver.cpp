@@ -3,6 +3,7 @@
 #include "sslserver.h"
 
 #include <QDebug>
+#include <QNetworkInterface>
 #include <QSslSocket>
 
 FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const QString &userName, const QString &password, bool readOnly, bool onlyOneIpAllowed) :
@@ -28,6 +29,16 @@ FtpServer::FtpServer(QObject *parent, const QString &rootPath, int port, const Q
 bool FtpServer::isListening()
 {
     return server->isListening();
+}
+
+QString FtpServer::lanIp()
+{
+    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)) {
+            return address.toString();
+        }
+    }
+    return "";
 }
 
 void FtpServer::startNewControlConnection()
