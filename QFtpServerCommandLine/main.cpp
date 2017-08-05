@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     // Seed the random numbers.
-    qsrand(QTime::currentTime().msecsSinceStartOfDay());
+    qsrand(QTime::currentTime().msec());
 
     const QString &userName = getRandomString(3);
     const QString &password = getRandomString(3);
@@ -32,12 +32,12 @@ int main(int argc, char *argv[])
     // *TODO: Allow using port 0.
     FtpServer server(&a, rootPath, 2121, userName, password, false, false);
     if (server.isListening()) {
-        qDebug().noquote() << QString("Listening at %1:2121").arg(FtpServer::lanIp());
-        qDebug().noquote() << QString("User: %1").arg(userName);
-        qDebug().noquote() << QString("Password: %1").arg(password);
+        qDebug() << QString("Listening at %1:2121").arg(FtpServer::lanIp()).toStdString().c_str();
+        qDebug() << QString("User: %1").arg(userName).toStdString().c_str();
+        qDebug() << QString("Password: %1").arg(password).toStdString().c_str();
         return a.exec();
     } else {
-        qDebug() << QString("Failed to start");
+        qDebug() << QString("Failed to start").toStdString().c_str();
         return 1;
     }
 }
