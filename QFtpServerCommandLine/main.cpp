@@ -45,13 +45,12 @@ int main(int argc, char *argv[])
     // *TODO: Allow using port 0.
     FtpServer server(&a, rootPath, 2121, userName, password, false, false);
     if (server.isListening()) {
-        qDebug() << QString("Listening at %1:2121").arg(lanIp());
-        qDebug() << QString("User: %1").arg(userName);
-        qDebug() << QString("Password: %1").arg(password);
+        qDebug().noquote() << QString("Listening at %1:2121").arg(lanIp());
+        qDebug().noquote() << QString("User: %1").arg(userName);
+        qDebug().noquote() << QString("Password: %1").arg(password);
         return a.exec();
     } else {
         qDebug() << QString("Failed to start");
         return 1;
     }
 }
-
