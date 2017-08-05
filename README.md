@@ -5,6 +5,10 @@ QFtpServer - an FTP server written in Qt
 
 QFtpServer is an event-driven server which is written entirely in Qt. It does not use external libraries except those which come with Qt. It is non-blocking and supports multiple connections.
 
+This project started because I couldn't find a free FTP server for my Symbian phone so I decided to try and make one of my own.  I've tested it against Filezilla, Chrome, Firefox, Safari, Windows Explorer, and others.
+
+### Features
+
 It supports:
 
 * Active connections (PORT command).
@@ -16,8 +20,6 @@ It doesn't support:
 * IPv6.
 * FTPS (this standard is obsolete and FTP-ES should be used instead).
 * Multiple user accounts.
-
-This project started because I couldn't find a free FTP server for my Symbian phone so I decided to try and make one of my own. I've tested it against Filezilla, Chrome, Firefox, Safari, Windows Explorer, and others.
 
 ### Example usage:
 
