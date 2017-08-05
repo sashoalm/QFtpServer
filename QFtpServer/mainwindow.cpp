@@ -5,8 +5,6 @@
 
 #include <QCoreApplication>
 #include <QSettings>
-#include <QNetworkInterface>
-#include <QHostAddress>
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -152,20 +150,10 @@ void MainWindow::startServer()
                            password, ui->checkBoxReadOnly->isChecked(), ui->checkBoxOnlyOneIpAllowed->isChecked());
     connect(server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
     if (server->isListening()) {
-        ui->statusBar->showMessage("Listening at " + lanIp());
+        ui->statusBar->showMessage("Listening at " + FtpServer::lanIp());
     } else {
         ui->statusBar->showMessage("Not listening");
     }
-}
-
-QString MainWindow::lanIp()
-{
-    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)) {
-            return address.toString();
-        }
-    }
-    return "";
 }
 
 void MainWindow::on_pushButtonRestartServer_clicked()
