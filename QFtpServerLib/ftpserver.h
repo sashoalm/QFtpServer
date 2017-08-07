@@ -3,13 +3,14 @@
 
 #include <QObject>
 #include <QSet>
+#include <qftpserverlib_global.h>
 
 class SslServer;
 
 // The ftp server. Listens on a port, and starts a new control connection each
 // time it gets connected.
 
-class FtpServer : public QObject
+class QFTPSERVERLIBSHARED_EXPORT FtpServer : public QObject
 {
     Q_OBJECT
 public:
