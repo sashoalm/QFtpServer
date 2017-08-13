@@ -13,6 +13,8 @@ class DataConnection;
 // command. All of the ftp commands except the ones that require a data
 // connection are implemented here.
 
+// *TODO: Make functions that don't use member variables static.
+
 class FtpControlConnection : public QObject
 {
     Q_OBJECT
@@ -54,42 +56,41 @@ private:
     // local path (local for the OS on which the ftp server is running).
     QString toLocalPath(const QString &fileName) const;
     // Parses and executes a single command (for example "CD /path/to/dir").
-    void processCommand(const QString &entireCommand);
-    void initializeFtpCommand(FtpCommand *ftpCommand);
+    QString processCommand(const QString &entireCommand);
     // Open a new active data connection.
-    void port(const QString &addressAndPort);
+    QString port(const QString &addressAndPort);
     // Open a new passive data connection.
-    void pasv();
+    QString pasv();
     // List directory contents. Equivalent to 'ls' in UNIX, or 'dir' in DOS.
-    void list(const QString &dir, bool nameListOnly);
+    QString list(const QString &dir, bool nameListOnly);
     // Retrieve a file. FTP client uses this command to download files.
-    void retr(const QString &fileName);
+    QString retr(const QString &fileName);
     // Store a file. FTP client uses this command to upload files.
-    void stor(const QString &fileName, bool appendMode = false);
+    QString stor(const QString &fileName, bool appendMode = false);
     // Change current directory, i.e. CD.
-    void cwd(const QString &dir);
+    QString cwd(const QString &dir);
     // Create a directory.
-    void mkd(const QString &dir);
+    QString mkd(const QString &dir);
     // Delete a directory (fails if directory not empty).
-    void rmd(const QString &dir);
+    QString rmd(const QString &dir);
     // Delete a file.
-    void dele(const QString &fileName);
+    QString dele(const QString &fileName);
     // Rename a directory or file.
-    void rnto(const QString &fileName);
+    QString rnto(const QString &fileName);
     // Quits the FTP session. The control connection closes.
-    void quit();
+    QString quit();
     // Returns the size of the file.
-    void size(const QString &fileName);
+    QString size(const QString &fileName);
     // Enters the password.
-    void pass(const QString &password);
+    QString pass(const QString &password);
     // The client instructs the server to switch to FTPS.
-    void auth();
+    QString auth();
     // Set protection level.
-    void prot(const QString &protectionLevel);
+    QString prot(const QString &protectionLevel);
     // CD up one level - equivalent to "CD .."
-    void cdup();
+    QString cdup();
     // Server reports which features it supports.
-    void feat();
+    QString feat();
     // If the previous command was REST, returns its value. The REST command
     // allows to the client to continue partially downloaded/uploaded files.
     qint64 seekTo();
