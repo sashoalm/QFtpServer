@@ -12,9 +12,10 @@ class FtpCommand : public QObject
     Q_OBJECT
 public:
     explicit FtpCommand(QObject *parent = 0);
+    ~FtpCommand();
 
 signals:
-    void reply(const QString &details);
+    void finished(const QString &errorText);
 
 public:
     void start(QSslSocket *socket);
@@ -22,7 +23,7 @@ public:
 protected:
     virtual void startImplementation() = 0;
     QSslSocket* socket;
-    bool started;
+    QString errorText;
 };
 
 #endif // FTPCOMMAND_H

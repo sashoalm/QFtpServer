@@ -11,7 +11,7 @@ class FtpRetrCommand : public FtpCommand
 {
     Q_OBJECT
 public:
-    explicit FtpRetrCommand(QObject *parent, const QString &fileName, qint64 seekTo = 0);
+    explicit FtpRetrCommand(QObject *parent, QFile *file);
     ~FtpRetrCommand();
 
 private slots:
@@ -20,9 +20,7 @@ private slots:
 private:
     void startImplementation();
 
-    QString fileName;
     QFile *file;
-    qint64 seekTo;
 };
 
 #endif // FTPRETRCOMMAND_H

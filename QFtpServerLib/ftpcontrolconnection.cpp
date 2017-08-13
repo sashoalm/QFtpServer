@@ -55,6 +55,14 @@ void FtpControlConnection::disconnectFromHost()
     socket->disconnectFromHost();
 }
 
+void FtpControlConnection::ftpCommandFinished(const QString &errorText)
+{
+    if (!errorText.isEmpty()) {
+        reply(errorText);
+    }
+    reply("226 Closing data connection.");
+}
+
 bool FtpControlConnection::verifyAuthentication(const QString &command)
 {
     if (isLoggedIn) {
@@ -239,17 +247,6 @@ void FtpControlConnection::processCommand(const QString &entireCommand)
     lastProcessedCommand = entireCommand;
 }
 
-void FtpControlConnection::startOrScheduleCommand(FtpCommand *ftpCommand)
-{
-    connect(ftpCommand, SIGNAL(reply(QString)), this, SLOT(reply(QString)));
-
-    if (!dataConnection->setFtpCommand(ftpCommand)) {
-        delete ftpCommand;
-        reply("425 Can't open data connection.");
-        return;
-    }
-}
-
 void FtpControlConnection::port(const QString &addressAndPort)
 {
     // Example PORT command:
@@ -272,17 +269,69 @@ void FtpControlConnection::pasv()
 
 void FtpControlConnection::list(const QString &dir, bool nameListOnly)
 {
-    startOrScheduleCommand(new FtpListCommand(this, dir, nameListOnly));
+    if (!dataConnection->isReadyToConnect()) {
+        reply("425 Can't open data connection.");
+        return;
+    }
+
+    QFileInfo info(dir);
+    if (!info.isReadable()) {
+        reply("425 File or directory is not readable or doesn't exist.");
+        return;
+    }
+
+    FtpListCommand *ftpCommand = new FtpListCommand(this, dir, nameListOnly);
+    connect(ftpCommand, SIGNAL(finished(QString)), this, SLOT(ftpCommandFinished(QString)));
+    dataConnection->setFtpCommand(ftpCommand);
+    emit reply("150 File status okay; about to open data connection.");
 }
 
 void FtpControlConnection::retr(const QString &fileName)
 {
-    startOrScheduleCommand(new FtpRetrCommand(this, fileName, seekTo()));
+    if (!dataConnection->isReadyToConnect()) {
+        reply("425 Can't open data connection.");
+        return;
+    }
+
+    QFile *file = new QFile(fileName);
+    if (!file->open(QIODevice::ReadOnly)) {
+        delete file;
+        emit reply("550 Requested action not taken; file unavailable.");
+        return;
+    }
+
+    if (int a = seekTo()) {
+        file->seek(a);
+    }
+
+    FtpRetrCommand *ftpCommand = new FtpRetrCommand(this, file);
+    connect(ftpCommand, SIGNAL(finished(QString)), this, SLOT(ftpCommandFinished(QString)));
+    dataConnection->setFtpCommand(ftpCommand);
+    emit reply("150 File status okay; about to open data connection.");
 }
 
 void FtpControlConnection::stor(const QString &fileName, bool appendMode)
 {
-    startOrScheduleCommand(new FtpStorCommand(this, fileName, appendMode, seekTo()));
+    if (!dataConnection->isReadyToConnect()) {
+        reply("425 Can't open data connection.");
+        return;
+    }
+
+    QFile *file = new QFile(fileName);
+    if (!file->open(appendMode ? QIODevice::Append : QIODevice::WriteOnly)) {
+        delete file;
+        emit reply("550 Requested action not taken; file unavailable.");
+        return;
+    }
+
+    if (int a = seekTo()) {
+        file->seek(a);
+    }
+
+    FtpStorCommand *ftpCommand = new FtpStorCommand(this, file);
+    connect(ftpCommand, SIGNAL(finished(QString)), this, SLOT(ftpCommandFinished(QString)));
+    dataConnection->setFtpCommand(ftpCommand);
+    emit reply("150 File status okay; about to open data connection.");
 }
 
 void FtpControlConnection::cwd(const QString &dir)

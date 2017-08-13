@@ -2,9 +2,10 @@
 #define FTPLISTCOMMAND_H
 
 #include "ftpcommand.h"
+#include <QFileInfo>
+#include <QFileInfoList>
 
 class QTimer;
-class QFileInfo;
 typedef QList<QFileInfo> QFileInfoList;
 
 // Implements the LIST command. Prints out a listing of the given directory, in
@@ -14,7 +15,7 @@ class FtpListCommand : public FtpCommand
 {
     Q_OBJECT
 public:
-    explicit FtpListCommand(QObject *parent, const QString &listDirectory, bool nameListOnly = false);
+    explicit FtpListCommand(QObject *parent, const QFileInfo &listDirectory, bool nameListOnly = false);
     ~FtpListCommand();
 
 private:
@@ -25,10 +26,10 @@ private slots:
     void listNextBatch();
 
 private:
-    QString listDirectory;
+    QFileInfo listDirectory;
     bool nameListOnly;
     QTimer *timer;
-    QFileInfoList *list;
+    QFileInfoList fileInfoList;
     int index;
 };
 

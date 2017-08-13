@@ -34,11 +34,14 @@ public:
 
     // Sets the ftp command. This function can be called only once after each
     // call of listen().
-    bool setFtpCommand(FtpCommand *command);
+    void setFtpCommand(FtpCommand *command);
 
     // Returns the currently running ftpCommand, if it is already running, but
     // not yet finished. Otherwise returns 0.
     FtpCommand *ftpCommand();
+
+    // Check if data connection is ready to connect.
+    bool isReadyToConnect() { return _isReadyToConnect; }
 
 signals:
 
@@ -53,7 +56,7 @@ private:
     QSslSocket *socket;
     QPointer<FtpCommand> command;
     bool isSocketReady;
-    bool isWaitingForFtpCommand;
+    bool _isReadyToConnect;
     bool encrypt;
 
     // Used for the active data connection (PORT command).

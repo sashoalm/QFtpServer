@@ -10,7 +10,7 @@ DataConnection::DataConnection(QObject *parent) :
     connect(server, SIGNAL(newConnection()), this, SLOT(newConnection()));
     socket = 0;
     isSocketReady = false;
-    isWaitingForFtpCommand = false;
+    _isReadyToConnect = false;
 }
 
 void DataConnection::scheduleConnectToHost(const QString &hostName, int port, bool encrypt)
@@ -20,7 +20,7 @@ void DataConnection::scheduleConnectToHost(const QString &hostName, int port, bo
     this->hostName = hostName;
     this->port = port;
     isSocketReady = false;
-    isWaitingForFtpCommand = true;
+    _isReadyToConnect = true;
     isActiveConnection = true;
 }
 
@@ -32,19 +32,20 @@ int DataConnection::listen(bool encrypt)
     delete command;
     command = 0;
     isSocketReady = false;
-    isWaitingForFtpCommand = true;
+    _isReadyToConnect = true;
     isActiveConnection = false;
     server->close();
     server->listen();
     return server->serverPort();
 }
 
-bool DataConnection::setFtpCommand(FtpCommand *command)
+void DataConnection::setFtpCommand(FtpCommand *command)
 {
-    if (!isWaitingForFtpCommand) {
-        return false;
+    Q_ASSERT(_isReadyToConnect);
+    if (!_isReadyToConnect) {
+        return;
     }
-    isWaitingForFtpCommand = false;
+    _isReadyToConnect = false;
     this->command = command;
     command->setParent(this);
 
@@ -55,7 +56,6 @@ bool DataConnection::setFtpCommand(FtpCommand *command)
     } else {
         startFtpCommand();
     }
-    return true;
 }
 
 FtpCommand *DataConnection::ftpCommand()

@@ -22,18 +22,17 @@ public:
 
 signals:
 
-public slots:
-    // Slot used by the data connection handlers to send messages to the FTP
-    // client through the control connection.
-    void reply(const QString &replyCode);
-
 private slots:
     // Handles any new data comming from the FTP client.
     void acceptNewData();
     // We need this because QSslSocket::disconnectFromHost() is not a slot.
     void disconnectFromHost();
+    // Called when a data connection ftp command (list/retr/stor) has finished.
+    void ftpCommandFinished(const QString &errorText);
 
 private:
+    // Send a response to the FTP client.
+    void reply(const QString &replyCode);
     // Verify authentication for commands that require it. Returns true
     // if user logged in or if command doesn't require it.
     bool verifyAuthentication(const QString &command);
@@ -56,7 +55,7 @@ private:
     QString toLocalPath(const QString &fileName) const;
     // Parses and executes a single command (for example "CD /path/to/dir").
     void processCommand(const QString &entireCommand);
-    void startOrScheduleCommand(FtpCommand *ftpCommand);
+    void initializeFtpCommand(FtpCommand *ftpCommand);
     // Open a new active data connection.
     void port(const QString &addressAndPort);
     // Open a new passive data connection.
