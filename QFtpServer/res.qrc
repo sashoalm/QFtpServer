@@ -1,8 +1,4 @@
 <RCC>
-    <qresource prefix="/ssl">
-        <file>cacert.pem</file>
-        <file>privkey.pem</file>
-    </qresource>
     <qresource prefix="/icons">
         <file alias="appicon">android/res/drawable-hdpi/icon.png</file>
     </qresource>

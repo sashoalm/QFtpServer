@@ -40,7 +40,6 @@ RESOURCES += \
     res.qrc
 
 OTHER_FILES += \
-    privkey.pem \
     cacert.pem \
     android/AndroidManifest.xml
 
