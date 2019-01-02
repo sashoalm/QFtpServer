@@ -3,13 +3,15 @@
 #include "ftpserver.h"
 #include "debuglogdialog.h"
 
+#if defined(Q_OS_ANDROID)
+    #include "android/jni/JavaUtil.h"
+    #include "android/jni/AndroidDirectory.h"
+#endif
+
 #include <QCoreApplication>
 #include <QSettings>
 #include <QFileDialog>
-#include <QIntValidator> 
-#if defined(Q_OS_ANDROID)
-    #include "android/jni/JavaUtil.h"
-#endif
+#include <QIntValidator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -125,7 +127,14 @@ void MainWindow::loadSettings()
     ui->lineEditPort->setText(settings.value("settings/port", defaultPort).toString());
     ui->lineEditUserName->setText(settings.value("settings/username", "admin").toString());
     ui->lineEditPassword->setText(settings.value("settings/password", "qt").toString());
-    ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
+    QString rootPath = QDir::rootPath();
+#ifdef Q_OS_ANDROID
+    QDir root(CAndroidDirectory::GetExternalStorageDirectory());
+    if(root.exists())
+        rootPath = CAndroidDirectory::GetExternalStorageDirectory();
+#endif 
+    ui->lineEditRootPath->setText(settings.value("settings/rootpath", rootPath).toString());
+    //ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
     ui->checkBoxAnonymous->setChecked(settings.value("settings/anonymous", false).toBool());
     ui->checkBoxReadOnly->setChecked(settings.value("settings/readonly", false).toBool());
     ui->checkBoxOnlyOneIpAllowed->setChecked(settings.value("settings/oneip", true).toBool());

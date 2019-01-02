@@ -12,7 +12,7 @@ class CJavaUtil : public QObject
     Q_OBJECT
     
 public:
-    CJavaUtil(QObject *parent = NULL);
+    CJavaUtil(QObject *parent = nullptr);
     virtual ~CJavaUtil();
     
     static int InitPermissions();

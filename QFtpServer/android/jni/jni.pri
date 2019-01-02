@@ -3,7 +3,9 @@ QT += androidextras
 INCLUDEPATH += $$PWD
 
 SOURCES += \ 
-    $$PWD/JavaUtil.cpp
+    $$PWD/JavaUtil.cpp \
+    $$PWD/AndroidDirectory.cpp
 
 HEADERS += \ 
-    $$PWD/JavaUtil.h
+    $$PWD/JavaUtil.h \
+    $$PWD/AndroidDirectory.h

@@ -21,6 +21,7 @@ int CJavaUtil::InitPermissions()
     if(inited)
         return 0;
     inited = true;
+
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
     QStringList lstPermission;
     QtAndroid::PermissionResult r;
