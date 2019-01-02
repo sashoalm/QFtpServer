@@ -37,7 +37,7 @@ private slots:
     void on_pushButtonShowDebugLog_clicked();
 
     void on_pushButtonExit_clicked();
-
+    
 private:
     Ui::MainWindow *ui;
 

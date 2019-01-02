@@ -6,6 +6,10 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include <QFileDialog>
+#include <QIntValidator> 
+#if defined(Q_OS_ANDROID)
+    #include "android/jni/JavaUtil.h"
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -15,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEditPort->setValidator(new QIntValidator(1, 65535, this));
 
 #if defined(Q_OS_ANDROID)
+    CJavaUtil::InitPermissions();
+    
     // Fix for the bug android keyboard bug - see
     // http://stackoverflow.com/q/21074012/492336.
     foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {

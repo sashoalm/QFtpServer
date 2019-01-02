@@ -40,10 +40,10 @@ RESOURCES += \
     res.qrc
 
 OTHER_FILES += \
-    cacert.pem \
-    android/AndroidManifest.xml
+    cacert.pem 
 
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+# android
+android:include(android/android.pri)
 
 DISTFILES +=
 
