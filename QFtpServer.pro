@@ -5,3 +5,5 @@ SUBDIRS += QFtpServer \
 
 QFtpServer.depends = QFtpServerLib
 QFtpServerCommandLine.depends = QFtpServerLib
+
+OTHER_FILES += README.md
