@@ -1,0 +1,3 @@
+[submodule "QFtpServer/android/android_lib"]
+	path = QFtpServer/android/android_lib
+	url = https://github.com/KangLin/QtAndroidUtils.git

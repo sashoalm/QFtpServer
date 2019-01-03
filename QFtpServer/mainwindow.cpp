@@ -4,8 +4,8 @@
 #include "debuglogdialog.h"
 
 #if defined(Q_OS_ANDROID)
-    #include "android/jni/JavaUtil.h"
-    #include "android/jni/AndroidDirectory.h"
+    #include "AndroidUtils.h"
+    #include "AndroidDirectory.h"
 #endif
 
 #include <QCoreApplication>
@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEditPort->setValidator(new QIntValidator(1, 65535, this));
 
 #if defined(Q_OS_ANDROID)
-    CJavaUtil::InitPermissions();
+    CAndroidUtils::InitPermissions();
     
     // Fix for the bug android keyboard bug - see
     // http://stackoverflow.com/q/21074012/492336.
