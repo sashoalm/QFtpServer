@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/icons">
         <file alias="appicon">android/res/drawable-hdpi/icon.png</file>
+        <file alias="close">android/res/drawable-hdpi/close_high.png</file>
     </qresource>
 </RCC>
