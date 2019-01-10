@@ -16,3 +16,6 @@ else:unix: LIBS += -L$$OUT_PWD/../QFtpServerLib/ -lQFtpServerLib
 
 INCLUDEPATH += $$PWD/../QFtpServerLib
 DEPENDPATH += $$PWD/../QFtpServerLib
+
+# android
+android:include($$PWD/../QFtpServer/android/android.pri)
