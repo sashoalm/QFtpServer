@@ -8,11 +8,13 @@
     #include "AndroidDirectory.h"
 #endif
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QSettings>
 #include <QFileDialog>
 #include <QIntValidator>
 #include <QMessageBox>
+#include <QDebug>
+#include <QImage>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -21,12 +23,15 @@ MainWindow::MainWindow(QWidget *parent)
       m_TrayIconMenu(this)
 {
     ui->setupUi(this);
-
+    
+    m_nCloseType = UNKNOW;
+    
     ui->lineEditPort->setValidator(new QIntValidator(1, 65535, this));
 
 #if defined(Q_OS_ANDROID)
     CAndroidUtils::InitPermissions();
-    
+    connect(qApp, SIGNAL(applicationStateChanged(Qt::ApplicationState)),
+            this, SLOT(slotApplicationStateChanged(Qt::ApplicationState)));
     // Fix for the bug android keyboard bug - see
     // http://stackoverflow.com/q/21074012/492336.
     foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {
@@ -160,7 +165,9 @@ void MainWindow::loadSettings()
     ui->checkBoxAnonymous->setChecked(settings.value("settings/anonymous", false).toBool());
     ui->checkBoxReadOnly->setChecked(settings.value("settings/readonly", false).toBool());
     ui->checkBoxOnlyOneIpAllowed->setChecked(settings.value("settings/oneip", true).toBool());
+#ifndef Q_OS_ANDROID
     m_nCloseType = settings.value("settings/closetype", UNKNOW).toInt();
+#endif
 }
 
 void MainWindow::saveSettings()
@@ -173,7 +180,9 @@ void MainWindow::saveSettings()
     settings.setValue("settings/anonymous", ui->checkBoxAnonymous->isChecked());
     settings.setValue("settings/readonly", ui->checkBoxReadOnly->isChecked());
     settings.setValue("settings/oneip", ui->checkBoxOnlyOneIpAllowed->isChecked());
+#ifndef Q_OS_ANDROID
     settings.setValue("settings/closetype", m_nCloseType);
+#endif
 }
 
 void MainWindow::startServer()
@@ -246,8 +255,9 @@ void MainWindow::slotTrayIconActive(QSystemTrayIcon::ActivationReason e)
     }
 }
 
+#if !defined(Q_OS_ANDROID)
 void MainWindow::closeEvent(QCloseEvent *e)
-{
+{   
     if(EXIT & m_nCloseType)
     {
         m_nCloseType &= ~EXIT;
@@ -255,54 +265,56 @@ void MainWindow::closeEvent(QCloseEvent *e)
     }
     switch(m_nCloseType)
     {
-    case UNKNOW:
-    {    
-        QMessageBox msg(QMessageBox::Question,
+        case UNKNOW:
+        {    
+            QMessageBox msg(QMessageBox::Question,
                         tr("Close"),
                         tr("Is closed the programe or hidden programe windows?"),
                         QMessageBox::Close | QMessageBox::Yes | QMessageBox::Cancel,
                         this);
-        msg.setButtonText(QMessageBox::Yes, tr("Hidden"));
-        msg.setButtonText(QMessageBox::Cancel, tr("Cancel"));
-        msg.setDefaultButton(QMessageBox::Close);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-        QCheckBox cbSave(tr("Save the setting"), &msg);
-        msg.setCheckBox(&cbSave);
-#endif
-        int nRet = msg.exec();
-        switch(nRet)
-        {
-        case QMessageBox::Yes:
+
+            msg.setButtonText(QMessageBox::Yes, tr("Hidden"));
+            msg.setButtonText(QMessageBox::Cancel, tr("Cancel"));
+            msg.setDefaultButton(QMessageBox::Close);
+    #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+            QCheckBox cbSave(tr("Save the setting"), &msg);
+            msg.setCheckBox(&cbSave);
+    #endif
+            int nRet = msg.exec();
+            switch(nRet)
+            {
+            case QMessageBox::Yes:
+            {
+                this->hide();
+                m_nCloseType = HIDE;
+                e->ignore();
+                break;
+            }
+            case QMessageBox::Cancel:
+            {
+                e->ignore();
+                break;
+            }
+            default:
+                m_nCloseType = CLOSE;
+            }
+          
+    #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+            if(!msg.checkBox()->isChecked())
+                m_nCloseType = UNKNOW;
+    #endif
+            
+            break;
+        }
+        case HIDE:
         {
             this->hide();
-            m_nCloseType = HIDE;
             e->ignore();
             break;
         }
-        case QMessageBox::Cancel:
-        {
-            e->ignore();
-            break;
-        }
-        default:
-            m_nCloseType = CLOSE;
-        }
-      
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-        if(!msg.checkBox()->isChecked())
-            m_nCloseType = UNKNOW;
-#endif
-        
-        break;
-    }
-    case HIDE:
-    {
-        this->hide();
-        e->ignore();
-        break;
-    }
     }
 }
+#endif
 
 void MainWindow::slotActionExit(bool checked)
 {
@@ -315,3 +327,23 @@ void MainWindow::on_pushButtonExit_clicked()
     m_nCloseType |= EXIT;
     close();
 }
+
+#if defined(Q_OS_ANDROID)
+void MainWindow::slotApplicationStateChanged(Qt::ApplicationState state)
+{
+    qDebug() << "stats: " << state << " closetype: " << m_nCloseType;
+    if(EXIT & m_nCloseType)
+    {
+        m_nCloseType &= ~EXIT;
+        return;
+    }
+
+    if(Qt::ApplicationState::ApplicationInactive == state)
+        m_Notification.Show(tr("QFtpServer is running in backgroup"),
+                            tr("QFtpServer"),
+                            0,
+                            QImage(":/icons/appicon"),
+                            QImage(":/icons/appicon"));
+}
+#endif;
+

@@ -46,9 +46,8 @@ It supports:
 
 ### Build
 
-    git clone https://github.com/sashoalm/QFtpServer.git
+    git clone --recursive https://github.com/sashoalm/QFtpServer.git
     cd QFtpServer
-    git submodule update --init --recursive
     qmake QFtpServer.pro
     make 
     

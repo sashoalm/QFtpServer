@@ -5,6 +5,9 @@
 #include <QMenu>
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
+#if defined(Q_OS_ANDROID)
+    #include "Notification.h"
+#endif
 
 namespace Ui {
     class MainWindow;
@@ -40,9 +43,12 @@ private slots:
     // System tray icon
     void slotTrayIconActive(QSystemTrayIcon::ActivationReason e);
     void slotActionExit(bool checked);
-
+#if defined(Q_OS_ANDROID)
+    void slotApplicationStateChanged(Qt::ApplicationState state);
+#else
 protected:
-    virtual void closeEvent(QCloseEvent *e);
+    virtual void closeEvent(QCloseEvent *e);    
+#endif
     
 private:
     Ui::MainWindow *ui;
@@ -70,7 +76,9 @@ private:
         EXIT  = 4
     };
     int m_nCloseType;
-
+#if defined(Q_OS_ANDROID)
+    CNotification m_Notification;
+#endif
 };
 
 #endif // MAINWINDOW_H

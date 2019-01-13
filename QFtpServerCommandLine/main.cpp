@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QDateTime>
 #if defined(Q_OS_ANDROID)
-#include "AndroidUtils.h"
+    #include "AndroidUtils.h"
 #endif
 
 QChar getRandomChar()
