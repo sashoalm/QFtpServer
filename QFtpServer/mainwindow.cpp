@@ -343,7 +343,8 @@ void MainWindow::slotApplicationStateChanged(Qt::ApplicationState state)
                             tr("QFtpServer"),
                             0,
                             QImage(":/icons/appicon"),
-                            QImage(":/icons/appicon"));
+                            QImage(":/icons/appicon")
+                            );
 }
 #endif;
 
