@@ -45,7 +45,9 @@ private slots:
     void slotActionExit(bool checked);
 #if defined(Q_OS_ANDROID)
     void slotApplicationStateChanged(Qt::ApplicationState state);
+    void on_checkBoxDisableLockScreen_stateChanged(int arg1);
 #else
+    
 protected:
     virtual void closeEvent(QCloseEvent *e);    
 #endif

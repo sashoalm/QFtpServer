@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEditPort->setValidator(new QIntValidator(1, 65535, this));
 
 #if defined(Q_OS_ANDROID)
+    ui->checkBoxDisableLockScreen->checkState() == Qt::Checked
+            ? CAndroidUtils::ScreenWake() : CAndroidUtils::ScreenWake(false);
     CAndroidUtils::InitPermissions();
     connect(qApp, SIGNAL(applicationStateChanged(Qt::ApplicationState)),
             this, SLOT(slotApplicationStateChanged(Qt::ApplicationState)));
@@ -51,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
 #else
     // The exit button is needed only for Android. Hide it for other builds.
     ui->pushButtonExit->hide();
+    ui->checkBoxDisableLockScreen->hide();
 #endif // Q_OS_ANDROID
 
     // Set window icon.
@@ -345,6 +348,18 @@ void MainWindow::slotApplicationStateChanged(Qt::ApplicationState state)
                             QImage(":/icons/appicon"),
                             QImage(":/icons/appicon")
                             );
+    if(Qt::ApplicationState::ApplicationActive == state)
+        m_Notification.Cancel();
 }
-#endif;
+#endif
 
+#if defined (Q_OS_ANDROID)
+void MainWindow::on_checkBoxDisableLockScreen_stateChanged(int arg1)
+{
+    if(Qt::Checked == arg1)
+        CAndroidUtils::ScreenWake();
+    if(Qt::Unchecked == arg1) {
+        CAndroidUtils::ScreenWake(false);
+    }
+}
+#endif
