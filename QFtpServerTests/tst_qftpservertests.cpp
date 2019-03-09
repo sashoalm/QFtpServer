@@ -14,6 +14,7 @@ private Q_SLOTS:
     void testCaseMkd();
     void testCaseIncorrectLogin();
     void testCaseCorrectLogin();
+    void testCaseUploadAndDownload();
 };
 
 QFtpServerTests::QFtpServerTests()
@@ -127,6 +128,29 @@ void QFtpServerTests::testCaseCorrectLogin()
 
     // Assert
     QCOMPARE(a.client->error(), QFtp::NoError);
+}
+
+void QFtpServerTests::testCaseUploadAndDownload()
+{
+    // Arrange
+    Arrange a;
+    QString fn = "foo.txt";
+    QString text = "foo bar";
+
+    // Act
+    QBuffer buffer;
+    buffer.open(QIODevice::WriteOnly);
+    a.client->put(text.toAscii(), fn);
+    a.loop->exec();
+    a.client->get(fn, &buffer);
+    a.loop->exec();
+
+    // Assert
+    QFile f(a.rootPath + "/" + fn);
+    f.open(QIODevice::ReadOnly);
+    QVERIFY(f.exists());
+    QCOMPARE(QString(f.readAll()), text);
+    QCOMPARE(QString(buffer.data()), text);
 }
 
 QTEST_MAIN(QFtpServerTests)
