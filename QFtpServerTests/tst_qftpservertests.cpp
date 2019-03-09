@@ -12,6 +12,7 @@ public:
 
 private Q_SLOTS:
     void testCaseMkd();
+    void testCaseIncorrectLogin();
 };
 
 QFtpServerTests::QFtpServerTests()
@@ -69,6 +70,28 @@ void QFtpServerTests::testCaseMkd()
 
     // Assert
     QVERIFY(QDir(rootPath + "/foo").exists());
+}
+
+void QFtpServerTests::testCaseIncorrectLogin()
+{
+    // Arrange
+    int port = 9421;
+    QString rootPath = "/tmp/ftpservertest/";
+    removeRecursively(rootPath);
+    QDir().mkpath(rootPath);
+    FtpServer server(this, rootPath, port, "user1", "pass1");
+    Q_UNUSED(server);
+    QFtp client;
+    QEventLoop loop;
+    connect(&client, SIGNAL(done(bool)), &loop, SLOT(quit()));
+
+    // Act
+    client.connectToHost("localhost", port);
+    client.login("user1", "pass2");
+    loop.exec();
+
+    // Assert
+    QCOMPARE(client.error(), QFtp::UnknownError);
 }
 
 QTEST_MAIN(QFtpServerTests)
