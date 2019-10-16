@@ -3,6 +3,9 @@
 #include <ftpserver.h>
 #include <QDebug>
 #include <QDateTime>
+#if defined(Q_OS_ANDROID)
+    #include "AndroidUtils.h"
+#endif
 
 QChar getRandomChar()
 {
@@ -21,7 +24,9 @@ QString getRandomString(int n)
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-
+#if defined(Q_OS_ANDROID)
+    CAndroidUtils::InitPermissions();
+#endif
     // Seed the random numbers.
     qsrand(QTime::currentTime().msec());
 

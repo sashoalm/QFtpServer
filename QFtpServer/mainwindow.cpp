@@ -3,22 +3,42 @@
 #include "ftpserver.h"
 #include "debuglogdialog.h"
 
-#include <QCoreApplication>
+#if defined(Q_OS_ANDROID)
+    #include "AndroidUtils.h"
+    #include "AndroidDirectory.h"
+#endif
+
+#include <QApplication>
 #include <QSettings>
 #include <QFileDialog>
+#include <QIntValidator>
+#include <QMessageBox>
+#include <QDebug>
+#include <QImage>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow),
+      m_TrayIcon(this),
+      m_TrayIconMenu(this)
 {
     ui->setupUi(this);
-
+    
+    m_nCloseType = UNKNOW;
+    
     ui->lineEditPort->setValidator(new QIntValidator(1, 65535, this));
 
 #if defined(Q_OS_ANDROID)
+    ui->checkBoxDisableLockScreen->checkState() == Qt::Checked
+            ? CAndroidUtils::ScreenWake() : CAndroidUtils::ScreenWake(false);
+    CAndroidUtils::InitPermissions();
+    connect(qApp, SIGNAL(applicationStateChanged(Qt::ApplicationState)),
+            this, SLOT(slotApplicationStateChanged(Qt::ApplicationState)));
     // Fix for the bug android keyboard bug - see
     // http://stackoverflow.com/q/21074012/492336.
     foreach (QLineEdit *lineEdit, findChildren<QLineEdit*>()) {
-        connect(lineEdit, SIGNAL(editingFinished()), QGuiApplication::inputMethod(), SLOT(hide()));
+        connect(lineEdit, SIGNAL(editingFinished()),
+                QGuiApplication::inputMethod(), SLOT(hide()));
     }
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)) && (QT_VERSION < QT_VERSION_CHECK(5, 3, 0))
@@ -33,13 +53,31 @@ MainWindow::MainWindow(QWidget *parent)
 #else
     // The exit button is needed only for Android. Hide it for other builds.
     ui->pushButtonExit->hide();
+    ui->checkBoxDisableLockScreen->hide();
 #endif // Q_OS_ANDROID
 
     // Set window icon.
     setWindowIcon(QIcon(":/icons/appicon"));
-
+    if(QSystemTrayIcon::isSystemTrayAvailable())
+    {
+        bool check = connect(&m_TrayIcon,
+                  SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                  SLOT(slotTrayIconActive(QSystemTrayIcon::ActivationReason)));
+        Q_ASSERT(check);
+        QAction* pExit = m_TrayIconMenu.addAction(
+                    QIcon(":/icons/close"),
+                    tr("Exit"),
+                    this,
+                    SLOT(slotActionExit(bool)));
+        Q_ASSERT(pExit);
+        m_TrayIcon.setContextMenu(&m_TrayIconMenu);
+        m_TrayIcon.setToolTip(tr("QFtpServer"));
+        m_TrayIcon.setIcon(this->windowIcon());
+        m_TrayIcon.show();
+    }
+    
     loadSettings();
-    server = 0;
+    m_Server = 0;
     startServer();
 }
 
@@ -100,7 +138,7 @@ void MainWindow::showExpanded()
 #elif defined(Q_WS_MAEMO_5) || defined (Q_OS_ANDROID)
     showMaximized();
 #else
-    show();
+    showNormal();
 #endif
 }
 
@@ -119,10 +157,20 @@ void MainWindow::loadSettings()
     ui->lineEditPort->setText(settings.value("settings/port", defaultPort).toString());
     ui->lineEditUserName->setText(settings.value("settings/username", "admin").toString());
     ui->lineEditPassword->setText(settings.value("settings/password", "qt").toString());
-    ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
+    QString rootPath = QDir::rootPath();
+#ifdef Q_OS_ANDROID
+    QDir root(CAndroidDirectory::GetExternalStorageDirectory());
+    if(root.exists())
+        rootPath = CAndroidDirectory::GetExternalStorageDirectory();
+#endif 
+    ui->lineEditRootPath->setText(settings.value("settings/rootpath", rootPath).toString());
+    //ui->lineEditRootPath->setText(settings.value("settings/rootpath", QDir::rootPath()).toString());
     ui->checkBoxAnonymous->setChecked(settings.value("settings/anonymous", false).toBool());
     ui->checkBoxReadOnly->setChecked(settings.value("settings/readonly", false).toBool());
     ui->checkBoxOnlyOneIpAllowed->setChecked(settings.value("settings/oneip", true).toBool());
+#ifndef Q_OS_ANDROID
+    m_nCloseType = settings.value("settings/closetype", UNKNOW).toInt();
+#endif
 }
 
 void MainWindow::saveSettings()
@@ -135,6 +183,9 @@ void MainWindow::saveSettings()
     settings.setValue("settings/anonymous", ui->checkBoxAnonymous->isChecked());
     settings.setValue("settings/readonly", ui->checkBoxReadOnly->isChecked());
     settings.setValue("settings/oneip", ui->checkBoxOnlyOneIpAllowed->isChecked());
+#ifndef Q_OS_ANDROID
+    settings.setValue("settings/closetype", m_nCloseType);
+#endif
 }
 
 void MainWindow::startServer()
@@ -145,11 +196,11 @@ void MainWindow::startServer()
         userName = ui->lineEditUserName->text();
         password = ui->lineEditPassword->text();
     }
-    delete server;
-    server = new FtpServer(this, ui->lineEditRootPath->text(), ui->lineEditPort->text().toInt(), userName,
+    delete m_Server;
+    m_Server = new FtpServer(this, ui->lineEditRootPath->text(), ui->lineEditPort->text().toInt(), userName,
                            password, ui->checkBoxReadOnly->isChecked(), ui->checkBoxOnlyOneIpAllowed->isChecked());
-    connect(server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
-    if (server->isListening()) {
+    connect(m_Server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
+    if (m_Server->isListening()) {
         ui->statusBar->showMessage("Listening at " + FtpServer::lanIp());
     } else {
         ui->statusBar->showMessage("Not listening");
@@ -199,7 +250,116 @@ void MainWindow::on_pushButtonShowDebugLog_clicked()
     dlg->showExpanded();
 }
 
+void MainWindow::slotTrayIconActive(QSystemTrayIcon::ActivationReason e)
+{
+    if(QSystemTrayIcon::Trigger == e)
+    {
+        showExpanded();
+    }
+}
+
+#if !defined(Q_OS_ANDROID)
+void MainWindow::closeEvent(QCloseEvent *e)
+{   
+    if(EXIT & m_nCloseType)
+    {
+        m_nCloseType &= ~EXIT;
+        return;
+    }
+    switch(m_nCloseType)
+    {
+        case UNKNOW:
+        {    
+            QMessageBox msg(QMessageBox::Question,
+                        tr("Close"),
+                        tr("Is closed the programe or hidden programe windows?"),
+                        QMessageBox::Close | QMessageBox::Yes | QMessageBox::Cancel,
+                        this);
+
+            msg.setButtonText(QMessageBox::Yes, tr("Hidden"));
+            msg.setButtonText(QMessageBox::Cancel, tr("Cancel"));
+            msg.setDefaultButton(QMessageBox::Close);
+    #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+            QCheckBox cbSave(tr("Save the setting"), &msg);
+            msg.setCheckBox(&cbSave);
+    #endif
+            int nRet = msg.exec();
+            switch(nRet)
+            {
+            case QMessageBox::Yes:
+            {
+                this->hide();
+                m_nCloseType = HIDE;
+                e->ignore();
+                break;
+            }
+            case QMessageBox::Cancel:
+            {
+                e->ignore();
+                break;
+            }
+            default:
+                m_nCloseType = CLOSE;
+            }
+          
+    #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+            if(!msg.checkBox()->isChecked())
+                m_nCloseType = UNKNOW;
+    #endif
+            
+            break;
+        }
+        case HIDE:
+        {
+            this->hide();
+            e->ignore();
+            break;
+        }
+    }
+}
+#endif
+
+void MainWindow::slotActionExit(bool checked)
+{
+    Q_UNUSED(checked);
+    on_pushButtonExit_clicked();
+}
+
 void MainWindow::on_pushButtonExit_clicked()
 {
+    m_nCloseType |= EXIT;
     close();
 }
+
+#if defined(Q_OS_ANDROID)
+void MainWindow::slotApplicationStateChanged(Qt::ApplicationState state)
+{
+    qDebug() << "stats: " << state << " closetype: " << m_nCloseType;
+    if(EXIT & m_nCloseType)
+    {
+        m_nCloseType &= ~EXIT;
+        return;
+    }
+
+    if(Qt::ApplicationState::ApplicationInactive == state)
+        m_Notification.Show(tr("QFtpServer is running in backgroup"),
+                            tr("QFtpServer"),
+                            0,
+                            QImage(":/icons/appicon"),
+                            QImage(":/icons/appicon")
+                            );
+    if(Qt::ApplicationState::ApplicationActive == state)
+        m_Notification.Cancel();
+}
+#endif
+
+#if defined (Q_OS_ANDROID)
+void MainWindow::on_checkBoxDisableLockScreen_stateChanged(int arg1)
+{
+    if(Qt::Checked == arg1)
+        CAndroidUtils::ScreenWake();
+    if(Qt::Unchecked == arg1) {
+        CAndroidUtils::ScreenWake(false);
+    }
+}
+#endif
