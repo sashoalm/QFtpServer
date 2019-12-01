@@ -21,9 +21,13 @@ QFtpServerTests::QFtpServerTests()
 {
 }
 
+// Encapsulates common logic for arranging a test case by creating the
+// QFtpServer, a QFtp client, and a root directory for the ftp server (it
+// recursively deletes its contents).
 class Arrange
 {
 public:
+    // Parameters that can be used to configure the ftp server for testing.
     struct Params
     {
         const char *userName;
@@ -33,6 +37,7 @@ public:
 
     Arrange(Params *params = 0)
     {
+        // Use default params if the user hasn't supplied any.
         Params defaultParams;
         defaultParams.userName = "";
         defaultParams.password = "";
@@ -41,18 +46,22 @@ public:
             params = &defaultParams;
         }
 
+        // Create the FTP server instance.
         int port = 9421;
         rootPath = "/tmp/ftpservertest/";
         removeRecursively(rootPath);
         QDir().mkpath(rootPath);
         server.reset(new FtpServer(0, rootPath, port, params->userName, params->password));
 
+        // Create the FTP client (and optionally login).
         client.reset(new QFtp());
         client->connectToHost("localhost", port);
         if (params->login) {
             client->login(params->userName, params->password);
         }
 
+        // Create the event loop and connect the client to it
+        // so that the event loop stops once the client reports it's ready with an operation.
         loop.reset(new QEventLoop());
         QObject::connect(client.data(), SIGNAL(done(bool)), loop.data(), SLOT(quit()));
     }
