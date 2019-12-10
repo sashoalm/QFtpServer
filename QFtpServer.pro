@@ -6,4 +6,7 @@ SUBDIRS += QFtpServer \
 QFtpServer.depends = QFtpServerLib
 QFtpServerCommandLine.depends = QFtpServerLib
 
-OTHER_FILES += README.md
+OTHER_FILES += README.md \
+    .travis.yml \
+    appveyor.yml \
+    ci/* 
