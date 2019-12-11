@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 #if defined(Q_OS_ANDROID)
     ui->checkBoxDisableLockScreen->checkState() == Qt::Checked
-            ? CAndroidUtils::ScreenWake() : CAndroidUtils::ScreenWake(false);
+            ? CAndroidUtils::PowerWakeLock() : CAndroidUtils::PowerWakeLock(false);
     CAndroidUtils::InitPermissions();
     connect(qApp, SIGNAL(applicationStateChanged(Qt::ApplicationState)),
             this, SLOT(slotApplicationStateChanged(Qt::ApplicationState)));
@@ -357,9 +357,9 @@ void MainWindow::slotApplicationStateChanged(Qt::ApplicationState state)
 void MainWindow::on_checkBoxDisableLockScreen_stateChanged(int arg1)
 {
     if(Qt::Checked == arg1)
-        CAndroidUtils::ScreenWake();
+        CAndroidUtils::PowerWakeLock();
     if(Qt::Unchecked == arg1) {
-        CAndroidUtils::ScreenWake(false);
+        CAndroidUtils::PowerWakeLock(false);
     }
 }
 #endif
