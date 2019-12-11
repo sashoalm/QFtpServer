@@ -126,3 +126,23 @@ else
     $MAKE install
 fi
 
+if [ "${BUILD_TARGERT}" = "android" ]; then
+    ${QT_ROOT}/bin/androiddeployqt \
+        --input `pwd`/QFtpServer/android-libQFtpServer.so-deployment-settings.json \
+        --output `pwd`/android-build \
+        --android-platform ${ANDROID_API} \
+        --gradle 
+    APK_FILE=`find . -name "android-build-debug.apk"`
+    mv -f ${APK_FILE} $SOURCE_DIR/QFtpServer_${VERSION}.apk
+    APK_FILE=$SOURCE_DIR/QFtpServer_${VERSION}.apk
+    if [ "$TRAVIS_TAG" != "" \
+         -a "$BUILD_ARCH"="armeabi-v7a" \
+         -a "$QT_VERSION"="5.12.6" ]; then
+
+        export UPLOADTOOL_BODY="Release QFtpServer_${VERSION}"
+        #export UPLOADTOOL_PR_BODY=
+        wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+        chmod u+x upload.sh
+        ./upload.sh ${APK_FILE}
+    fi
+fi
