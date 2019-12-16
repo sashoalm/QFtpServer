@@ -127,7 +127,7 @@ deploy:
     #token : https://github.com/settings/tokens
     #password encrypt: https://ci.appveyor.com/tools/encrypt
     auth_token:
-      secure: I/iPgcw0IPuy66OiIjBSK33ZTrLDAlnnmfEpNo8q2DT6X3z1XJvYECnXGvef0C9y
+      secure: gSHXb8kHAivRhgV7Qn1iN7ljt6wAuCKaqm1emdrT3utkG4RjNLU6pB8aNDqY7cnl
     #artifact: QFtpServer$(BUILD_TARGERT)$(TOOLCHAIN_VERSION)_$(BUILD_ARCH)_$(QT_VERSION)_$(appveyor_build_version)
     #draft: true
     #prerelease: true
