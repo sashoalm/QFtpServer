@@ -70,7 +70,6 @@ case $TARGET_OS in
             if [ ! -d $ANDROID_NDK/prebuilt/${ANDROID_NDK_HOST} ]; then
                 ANDROID_NDK_HOST=windows
             fi
-            CONFIG_PARA="${CONFIG_PARA} -DCMAKE_MAKE_PROGRAM=make" #${ANDROID_NDK}/prebuilt/${ANDROID_NDK_HOST}/bin/make.exe"
         fi
         ;;
     Linux* | Unix*)
