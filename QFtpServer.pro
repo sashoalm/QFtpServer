@@ -9,4 +9,5 @@ QFtpServerCommandLine.depends = QFtpServerLib
 OTHER_FILES += README.md \
     .travis.yml \
     appveyor.yml \
-    ci/* 
+    ci/* \
+    tag.sh
