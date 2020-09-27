@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include <QFileDialog>
+#include <QIntValidator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
