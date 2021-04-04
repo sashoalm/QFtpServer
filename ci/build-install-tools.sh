@@ -129,7 +129,9 @@ function function_android()
     
     sudo apt-get install ant -qq -y
     sudo apt-get install libicu-dev -qq -y
-    
+    sudo apt-get install -y -qq libglu1-mesa-dev \
+        libxkbcommon-x11-dev   
+        
     function_common
     cd ${SOURCE_DIR}
 }

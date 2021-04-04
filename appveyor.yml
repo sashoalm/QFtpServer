@@ -8,7 +8,7 @@ environment:
     BUILD_ARCH: "armeabi-v7a"
     ANDROID_ARM_NEON: ON
     QT_VERSION_DIR: 5.12
-    QT_VERSION: 5.12.6
+    QT_VERSION: 5.12.10
     ANDROID_API: android-27
     TOOLCHAIN_VERSION: 4.9
 

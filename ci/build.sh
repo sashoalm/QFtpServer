@@ -136,7 +136,7 @@ if [ "${BUILD_TARGERT}" = "android" ]; then
     APK_FILE=$SOURCE_DIR/QFtpServer_${VERSION}.apk
     if [ "$TRAVIS_TAG" != "" \
          -a "$BUILD_ARCH"="armeabi-v7a" \
-         -a "$QT_VERSION"="5.12.6" ]; then
+         -a "$QT_VERSION"="5.12.10" ]; then
 
         export UPLOADTOOL_BODY="Release QFtpServer_${VERSION}"
         #export UPLOADTOOL_PR_BODY=
