@@ -9,6 +9,8 @@
     #include "Notification.h"
 #endif
 
+#include "ftpthread.h"
+
 namespace Ui {
     class MainWindow;
 }
@@ -37,6 +39,7 @@ private slots:
     void on_pushButtonRestartServer_clicked();
     void on_toolButtonBrowse_clicked();
     void onPeerIpChanged(const QString &peerIp);
+    void onMessage(const QString &msg);
     void on_pushButtonShowDebugLog_clicked();
     void on_pushButtonExit_clicked();
     
@@ -56,7 +59,7 @@ private:
     Ui::MainWindow *ui;
 
     // This is the FTP server object.
-    FtpServer *m_Server;
+    CFtpThread *server;
 
     // Load the stored settings.
     void loadSettings();
