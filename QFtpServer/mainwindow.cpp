@@ -6,9 +6,12 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include <QFileDialog>
+#include <QIntValidator>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow),
+      server(nullptr)
 {
     ui->setupUi(this);
 
@@ -45,6 +48,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    if(server)
+    {
+        server->quit();
+    }
     saveSettings();
     delete ui;
 }
@@ -145,15 +152,27 @@ void MainWindow::startServer()
         userName = ui->lineEditUserName->text();
         password = ui->lineEditPassword->text();
     }
-    delete server;
-    server = new FtpServer(this, ui->lineEditRootPath->text(), ui->lineEditPort->text().toInt(), userName,
-                           password, ui->checkBoxReadOnly->isChecked(), ui->checkBoxOnlyOneIpAllowed->isChecked());
-    connect(server, SIGNAL(newPeerIp(QString)), SLOT(onPeerIpChanged(QString)));
-    if (server->isListening()) {
-        ui->statusBar->showMessage("Listening at " + FtpServer::lanIp());
-    } else {
-        ui->statusBar->showMessage("Not listening");
+    if(server)
+    {
+        server->quit();
     }
+    //delete server;
+    server = new CFtpThread(ui->lineEditRootPath->text(),
+                                   ui->lineEditPort->text().toInt(),
+                                   userName,
+                                   password,
+                                   ui->checkBoxReadOnly->isChecked(),
+                                   ui->checkBoxOnlyOneIpAllowed->isChecked());
+    bool check = connect(server, SIGNAL(sigNewPeerIp(const QString&)),
+                         this, SLOT(onPeerIpChanged(const QString&)));
+    Q_ASSERT(check);
+    check = connect(server, SIGNAL(sigMessage(const QString&)),
+                    this, SLOT(onMessage(const QString&)));
+    Q_ASSERT(check);
+    check = connect(server, SIGNAL(finished()),
+                    server, SLOT(deleteLater()));
+    Q_ASSERT(check);
+    server->start();
 }
 
 void MainWindow::on_pushButtonRestartServer_clicked()
@@ -189,6 +208,11 @@ void MainWindow::on_toolButtonBrowse_clicked()
 void MainWindow::onPeerIpChanged(const QString &peerIp)
 {
     ui->statusBar->showMessage("Connected to " + peerIp);
+}
+
+void MainWindow::onMessage(const QString& msg)
+{
+    ui->statusBar->showMessage(msg);
 }
 
 void MainWindow::on_pushButtonShowDebugLog_clicked()
