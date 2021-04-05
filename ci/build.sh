@@ -100,10 +100,10 @@ case ${BUILD_TARGERT} in
 esac
 
 if [ -n "$appveyor_build_version" -a -z "$VERSION" ]; then
-    export VERSION="v2.0.0"
+    export VERSION="v2.0.1"
 fi
 if [ -z "$VERSION" ]; then
-    export VERSION="v2.0.0"
+    export VERSION="v2.0.1"
 fi
 
 if [ "ON" = "${STATIC}" ]; then
