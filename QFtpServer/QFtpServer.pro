@@ -43,7 +43,8 @@ RESOURCES += \
     res.qrc
 
 OTHER_FILES += \
-    cacert.pem 
+    cacert.pem \
+    CMakeLists.txt
 
 # android
 android:include(android/android.pri)

@@ -207,7 +207,6 @@ void MainWindow::startServer()
         server->quit();
 
     }
-    //delete server;
     server = new CFtpThread(ui->lineEditRootPath->text(),
                                    ui->lineEditPort->text().toInt(),
                                    userName,
@@ -220,6 +219,7 @@ void MainWindow::startServer()
     check = connect(server, SIGNAL(sigMessage(const QString&)),
                     this, SLOT(onMessage(const QString&)));
     Q_ASSERT(check);
+    // Delete server
     check = connect(server, SIGNAL(finished()),
                     server, SLOT(deleteLater()));
     Q_ASSERT(check);

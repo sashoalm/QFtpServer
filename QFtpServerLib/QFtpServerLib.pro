@@ -24,7 +24,7 @@ SOURCES += \
     sslserver.cpp
 
 HEADERS +=\
-        qftpserverlib_global.h \
+    qftpserverlib_global.h \
     dataconnection.h \
     ftpcommand.h \
     ftpcontrolconnection.h \
@@ -41,3 +41,5 @@ unix {
 
 RESOURCES += \
     certificates.qrc
+
+OTHER_FILES += CMakeLists.txt

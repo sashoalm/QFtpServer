@@ -10,4 +10,5 @@ OTHER_FILES += README.md \
     .travis.yml \
     appveyor.yml \
     ci/* \
-    tag.sh
+    tag.sh \
+    CMakeLists.txt
