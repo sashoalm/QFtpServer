@@ -45,8 +45,8 @@ set(SOURCE_FILES
     ftpstorcommand.cpp
     sslserver.cpp
     )
-
-add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+set(RCC_FILES certificates.qrc)
+add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${RCC_FILES})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${QT_LIBRARIES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE QFTPSERVERLIB_LIBRARY)
 target_include_directories(${PROJECT_NAME} PUBLIC
