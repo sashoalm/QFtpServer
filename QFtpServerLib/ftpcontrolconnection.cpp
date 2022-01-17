@@ -14,6 +14,9 @@
 #include <QDebug>
 #include <QTimer>
 #include <QSslSocket>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    #include <QRegularExpression>
+#endif
 
 FtpControlConnection::FtpControlConnection(QObject *parent, QSslSocket *socket, const QString &rootPath, const QString &userName, const QString &password, bool readOnly) :
     QObject(parent)
@@ -137,7 +140,11 @@ QString FtpControlConnection::toLocalPath(const QString &fileName) const
     // Note we do this **before** prepending the root path, in order to avoid
     // "jailbreaking" out of the "chroot".
     QStringList components;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    foreach (const QString &component, localPath.split('/', Qt::SkipEmptyParts)) {
+#else
     foreach (const QString &component, localPath.split('/', QString::SkipEmptyParts)) {
+#endif
         if (component == "..") {
             if (!components.isEmpty()) {
                 components.pop_back();
@@ -256,10 +263,21 @@ void FtpControlConnection::port(const QString &addressAndPort)
     // PORT h1,h2,h3,h4,p1,p2
 
     // Get IP and port.
+    QString hostName;
+    int port = 0;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QRegularExpression re("\\s*(\\d+,\\d+,\\d+,\\d+),(\\d+),(\\d+)");
+    QRegularExpressionMatch match = re.match(addressAndPort);
+    if (match.hasMatch()) {
+        hostName = match.captured(1).replace(',', '.');
+        port = match.captured(2).toInt() * 256 + match.captured(3).toInt();
+    }
+#else
     QRegExp exp("\\s*(\\d+,\\d+,\\d+,\\d+),(\\d+),(\\d+)");
     exp.indexIn(addressAndPort);
-    QString hostName = exp.cap(1).replace(',', '.');
-    int port = exp.cap(2).toInt() * 256 + exp.cap(3).toInt();
+    hostName = exp.cap(1).replace(',', '.');
+    port = exp.cap(2).toInt() * 256 + exp.cap(3).toInt();
+#endif
     dataConnection->scheduleConnectToHost(hostName, port, encryptDataConnection);
     reply("200 Command okay.");
 }
