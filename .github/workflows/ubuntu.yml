@@ -1,0 +1,243 @@
+name: ubuntu
+
+on: [push]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [Ubuntu-20.04, Ubuntu-18.04]
+        # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+        BUILD_TYPE: [Release, Debug]
+
+    runs-on: ${{matrix.os}}
+    env:
+      BUILD_TYPE:  ${{ matrix.BUILD_TYPE }}
+      SOURCE_DIR:  ${{github.workspace}}/.cache/source
+      TOOSL_DIR:   ${{github.workspace}}/.cache/tools
+      INSTALL_DIR: ${{github.workspace}}/.cache/install_ubuntu_2022_02_14
+      QFtpServer_VERSION: 0.0.18
+      
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    
+    - name: make_directory
+      run: |
+        cmake -E make_directory ${{env.SOURCE_DIR}}
+        cmake -E make_directory ${{env.TOOSL_DIR}}
+        cmake -E make_directory ${{env.INSTALL_DIR}}
+  
+    - name: git clone RabbitCommon
+      working-directory: ${{env.SOURCE_DIR}}
+      run: git clone https://github.com/KangLin/RabbitCommon.git
+
+    - name: apt helper action
+      uses: ryankurte/action-apt@v0.2.0
+      with:
+        # architectures to pass to dpkg --add-architecture
+        #architectures: # optional
+        # apt packages to install
+        packages: xvfb xpra libglu1-mesa-dev libpulse-mainloop-glib0 cmake build-essential libusb-1.0-0-dev freerdp2-dev libvncserver-dev libpixman-1-dev libssh-dev libtelnet-dev libqxmpp-dev debhelper dh-systemd fakeroot graphviz doxygen qttools5-dev qttools5-dev-tools qtbase5-dev qtbase5-dev-tools qtmultimedia5-dev qtlocation5-dev libqt5svg5-dev libutf8proc-dev libqtermwidget5-0-dev libpam0g-dev libxkbcommon-dev libxkbcommon-x11-dev libx11-xcb-dev libx11-dev libxfixes-dev qtwebengine5-dev
+
+    - name: Cache installed
+      uses: actions/cache@v2
+      id: cache-installed
+      with:
+        path: |
+          ${{env.INSTALL_DIR}}
+        key: cache-installed-ubuntu-${{matrix.os}}-${{matrix.BUILD_TYPE}}
+
+#    - name: build FreeRDP
+#      working-directory: ${{env.SOURCE_DIR}}
+#      run: |
+#        if [ ! -d ${{env.INSTALL_DIR}}/lib/cmake/FreeRDP2 ]; then
+#            git clone -b 2.5.0 https://github.com/FreeRDP/FreeRDP.git
+#            cd FreeRDP
+#            git submodule update --init --recursive
+#            cmake -E make_directory build
+#            cd build
+#            cmake .. \
+#                -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} \
+#                -DCMAKE_INSTALL_PREFIX="${{env.INSTALL_DIR}}" \
+#                -DWITH_SERVER=ON
+#            cmake --build . --config ${{matrix.BUILD_TYPE}}
+#            cmake --build . --config ${{matrix.BUILD_TYPE}} --target install/strip
+#        fi
+
+    - name: build RabbitVNC
+      working-directory: ${{env.SOURCE_DIR}}
+      run: |
+        if [ ! -d ${{env.INSTALL_DIR}}/lib/cmake/RabbitVNC ]; then
+            git clone https://github.com/KangLin/RabbitVNC.git 
+            cd ${{env.SOURCE_DIR}}/RabbitVNC
+            cmake -E make_directory build
+            cd build
+            cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} \
+                -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} \
+                -DBUILD_TESTS=OFF -DBUILD_VIEWER=OFF
+            cmake --build . --config ${{ matrix.BUILD_TYPE }}
+            cmake --build . --config ${{ matrix.BUILD_TYPE }} --target install/strip
+        fi
+
+    - name: build tigervnc
+      working-directory: ${{env.SOURCE_DIR}}
+      run: |
+        if [ ! -d ${{env.INSTALL_DIR}}/lib/cmake/tigervnc ]; then
+            git clone https://github.com/KangLin/tigervnc.git 
+            cd ${{env.SOURCE_DIR}}/tigervnc
+            cmake -E make_directory build
+            cd build
+            cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} \
+                -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} \
+                -DBUILD_TESTS=OFF -DBUILD_VIEWER=OFF
+            cmake --build . --config ${{ matrix.BUILD_TYPE }}
+            cmake --build . --config ${{ matrix.BUILD_TYPE }} --target install/strip
+        fi
+    
+    - name: build libdatachannel
+      working-directory: ${{env.SOURCE_DIR}}
+      run: |
+        if [ ! -d ${{env.INSTALL_DIR}}/lib/cmake/libdatachannel ]; then
+            git clone -b v0.15.5 https://github.com/paullouisageneau/libdatachannel.git
+            cd libdatachannel
+            git submodule update --init --recursive
+            cmake -E make_directory build
+            cd build
+            cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }}
+            cmake --build . --config ${{ matrix.BUILD_TYPE }}
+            cmake --build . --config ${{ matrix.BUILD_TYPE }} --target install/strip
+        fi
+
+    - name: build log4qt
+      working-directory: ${{env.SOURCE_DIR}}
+      env:
+        QT_ROOT: /usr/lib/`uname -m`-linux-gnu/qt5
+      run: |
+        if [ ! -d ${{env.INSTALL_DIR}}/lib/cmake/Log4Qt ]; then
+            git clone -b v1.5.1 "https://github.com/MEONMedical/Log4Qt.git"
+            cd Log4Qt
+            cmake -E make_directory build
+            cd build
+            cmake .. -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} \
+                -DQT_DIR=${{env.QT_ROOT}}/lib/cmake/Qt5 \
+                -DQt5_DIR=${{env.QT_ROOT}}/lib/cmake/Qt5 \
+                -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_DIR}} \
+                -DCMAKE_PREFIX_PATH=${{env.QT_ROOT}}
+            cmake --build . --config ${{matrix.BUILD_TYPE}}
+            cmake --build . --config ${{matrix.BUILD_TYPE}} --target install/strip
+        fi
+    
+    - name: build QtService
+      working-directory: ${{env.SOURCE_DIR}}
+      env:
+        QT_ROOT: /usr/lib/`uname -m`-linux-gnu/qt5
+      run: |
+        if [ ! -d ${{env.INSTALL_DIR}}/lib/cmake/QtService ]; then
+            git clone https://github.com/KangLin/qt-solutions.git
+            cd qt-solutions/qtservice
+            git submodule update --init --recursive
+            cmake -E make_directory build
+            cd build
+            cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} \
+                -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} \
+                -DQT_DIR=${{env.QT_ROOT}}/lib/cmake/Qt5 \
+                -DQt5_DIR=${{env.QT_ROOT}}/lib/cmake/Qt5
+            cmake --build . --config ${{ matrix.BUILD_TYPE }}
+            cmake --build . --config ${{ matrix.BUILD_TYPE }} --target install/strip
+        fi
+        
+    - name: build_debpackage.sh
+      working-directory: ${{github.workspace}}
+      env:
+        RabbitCommon_DIR: ${{env.SOURCE_DIR}}/RabbitCommon
+        RabbitVNC_DIR: ${{ env.INSTALL_DIR }}/lib/cmake/RabbitVNC
+        LibDataChannel_DIR: ${{ env.INSTALL_DIR }}/lib/cmake/LibDataChannel
+        QtService_DIR: ${{ env.INSTALL_DIR }}/lib/cmake/QtService
+        Log4Qt_DIR: ${{env.INSTALL_DIR}}/lib/cmake/Log4Qt
+#        FreeRDP_DIR: ${{env.INSTALL_DIR}}/lib/cmake/FreeRDP2
+#        FreeRDP-Client_DIR: ${{env.INSTALL_DIR}}/lib/cmake/FreeRDP-Client2
+#        WinPR_DIR: ${{env.INSTALL_DIR}}/lib/cmake/WinPR2
+#        FreeRDP-Shadow_DIR: ${{env.INSTALL_DIR}}/lib/cmake/FreeRDP-Shadow2
+#        FreeRDP-Server_DIR: ${{env.INSTALL_DIR}}/lib/cmake/FreeRDP-Server2
+      run: |
+        if [ ${{matrix.BUILD_TYPE}} == 'Release' ]; then
+            export BUILD_TERMINAL=OFF
+        else
+            export tigervnc_DIR=${{ env.INSTALL_DIR }}/lib/cmake/tigervnc
+        fi
+        ./build_debpackage.sh /usr/lib/`uname -m`-linux-gnu/qt5
+        cp ../qftpserver_${{env.QFtpServer_VERSION}}_amd64.deb qftpserver_${{env.QFtpServer_VERSION}}_amd64_${{matrix.os}}.deb
+
+#    - name: update xml file
+#      if: ${{ matrix.BUILD_TYPE == 'Release' }}
+#      working-directory: ${{github.workspace}}
+#      run: |
+#        #sudo apt update -y -qq
+#        #sudo apt-get install -y -qq xvfb xpra
+#        sudo Xvfb :999 -ac &
+#        export DISPLAY=:999.0
+#        echo "Install rabbit remote control ......"
+#        sudo dpkg -i qftpserver_${{env.QFtpServer_VERSION}}_amd64_${{ matrix.os }}.deb
+#        echo "Update update_linux.xml ......"
+#        /opt/QFtpServer/bin/QFtpServerApp -f "`pwd`/update_linux.xml" --pf qftpserver_${{env.QFtpServer_VERSION}}_amd64_${{ matrix.os }}.deb -m "v${{env.QFtpServer_VERSION}}"
+
+    - name: update 
+      uses: actions/upload-artifact@v2
+      with:
+          name: qftpserver_${{ matrix.os }}
+          path: |
+            qftpserver_*.deb
+      if: ${{ matrix.BUILD_TYPE == 'Release' }} 
+
+    - name: Upload To Github Release
+      if: ${{ matrix.BUILD_TYPE == 'Release' && startsWith(github.ref, 'refs/tags/') }}
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        prerelease: true
+        files: |
+            ${{github.workspace}}/qftpserver_*.deb
+
+#- name: Release
+#  uses: fnkr/github-action-ghr@v1
+#  if: startsWith(github.ref, 'refs/tags/')
+#  env:
+#    GHR_COMPRESS: xz
+#    GHR_PATH: ${{github.workspace}}/qftpserver_*.deb
+#    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+#    - name: Upload To Github Release
+#      # You may pin to the exact commit or the version.
+#      # uses: xresloader/upload-to-github-release@3ad14478ee4fb9bd65e84c6d496a7d6862892f43
+#      uses: xresloader/upload-to-github-release@v1.3.2
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#        # The files or file patterns to upload. You can upload multiple files by split them by semicolon. You can use the glob pattern to find the files.
+#        file: ${{github.workspace}}/qftpserver_*.deb;${{github.workspace}}/update_linux.xml # default is 
+#        # The files or file patterns to delete before uploading new files. You can delete multiple files by split them by semicolon. You can use the glob pattern to find the files.
+#        #delete_file: # optional, default is 
+#        # If you need to overwrite existing files, add overwrite: true to the with.
+#        overwrite: true # optional, default is false
+#        # The resultant deployment is a draft Release that only repository collaborators can see. This gives you an opportunity to examine and edit the draft release.
+#        draft: true # optional, default is true
+#        # The resultant deployment is a Prerelease. This gives you an opportunity to examine and edit the prerelease.
+#        prerelease: true # optional, default is false
+#        # With tags: true, your Releases deployment will trigger if and only if the build is a tagged build.
+#        tags: true # optional, default is false
+#        # Only work on these branches(splited by semicolon), set to nothing to accept all branches.
+#        branches: master # optional, default is 
+#        # With verbose: true, be verbose.
+#        verbose: true # optional, default is false
+#        # Set custom tag name.
+#        #tag_name: 'v${{env.QFtpServer_VERSION}}'
+#        # If try to update latest release.
+#        #update_latest_release: true # optional, default is false
+#      if: ${{ matrix.BUILD_TYPE == 'Release' && startsWith(github.ref, 'refs/tags/') }} 

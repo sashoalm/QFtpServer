@@ -1,0 +1,209 @@
+name: msvc
+
+on: [push]
+
+jobs:
+  use_install_qt:
+    name: ${{matrix.os}}-vc-${{matrix.VCPKG_PLATFORM_TOOLSET}}-${{matrix.triplet}}-qt${{matrix.qt_version}}-${{matrix.BUILD_TYPE}}
+
+    strategy:
+      matrix:
+        BUILD_TYPE: [Release, Debug]
+        os: [windows-latest]
+        CMAKE_GENERATOR: [Visual Studio 17 2022]
+        CMAKE_GENERATOR_PLATFORM: [x64, Win32]
+        # VCPKG_PLATFORM_TOOLSET: [v142, v141, v140]
+        include:
+          - triplet: x64-windows
+            VCPKG_PLATFORM_TOOLSET: v142
+            qt_version: 6.2.2
+            qt_arch: win64_msvc2019_64
+            CMAKE_GENERATOR_PLATFORM: x64
+            qt_modules: qtscxml qtpositioning
+
+          - triplet: x64-windows
+            VCPKG_PLATFORM_TOOLSET: v142
+            qt_version: 5.15.2
+            qt_arch: win64_msvc2019_64
+            CMAKE_GENERATOR_PLATFORM: x64
+
+          - triplet: x86-windows
+            VCPKG_PLATFORM_TOOLSET: v141
+            qt_version: 5.12.12
+            qt_arch: win32_msvc2017
+            CMAKE_GENERATOR_PLATFORM: Win32
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      SOURCE_DIR:  ${{github.workspace}}\.cache\source
+      TOOSL_DIR:   ${{github.workspace}}\.cache\tools
+      INSTALL_DIR: ${{github.workspace}}\.cache\install_msvc_${{matrix.triplet}}_${{matrix.BUILD_TYPE}}_2022_02_14
+      CMAKE_GENERATOR: ${{matrix.CMAKE_GENERATOR}}
+      VCPKG_PLATFORM_TOOLSET: ${{matrix.VCPKG_PLATFORM_TOOLSET}}
+      CMAKE_GENERATOR_PLATFORM: ${{matrix.CMAKE_GENERATOR_PLATFORM}}
+      QFtpServer_VERSION: v0.0.18
+      VCPKGGITCOMMITID: 5cf60186a241e84e8232641ee973395d4fde90e1
+      qt_modules: qtwebengine ${{matrix.qt_modules}}
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: make directory
+      run: |
+        cmake -E make_directory ${{env.SOURCE_DIR}}
+        cmake -E make_directory ${{env.TOOSL_DIR}}
+        cmake -E make_directory ${{env.INSTALL_DIR}}
+
+    - name: Cache installed
+      uses: actions/cache@v2
+      id: cache-installed
+      with:
+        path: |
+          ${{env.INSTALL_DIR}}
+        key: QFtpServer_msvc_cache-installed-${{matrix.os}}-vc${{matrix.VCPKG_PLATFORM_TOOLSET}}-${{matrix.triplet}}-qt${{matrix.qt_version}}-${{matrix.BUILD_TYPE}}
+
+    - name: run-vcpkg
+      uses: lukka/run-vcpkg@v7.4
+      with:
+        # Indicates whether to only setup vcpkg (i.e. installing it and setting the environment variables VCPKG_ROOT, RUNVCPK_VCPKG_ROOT), without installing any port.
+        #setupOnly: # optional
+        #vcpkgGitURL: https://github.com/KangLin/vcpkg.git
+        vcpkgGitCommitId: ${{env.VCPKGGITCOMMITID}}
+        vcpkgDirectory: ${{runner.workspace}}/vcpkg/
+        # Since the cache must be invalidated when content of the vcpkg.json file changes, let's
+        # compute its hash and append this to the computed cache's key.
+        appendedCacheKey: cache-vcpkg-msvc-${{matrix.os}}-vc${{matrix.VCPKG_PLATFORM_TOOLSET}}-${{matrix.triplet}}-qt${{matrix.qt_version}}-${{matrix.BUILD_TYPE}}-${{env.VCPKGGITCOMMITID}}
+        #additionalCachedPaths: ${{ env.VCPKG_ROOT }}/installed
+        vcpkgTriplet: '${{matrix.triplet}}'
+        vcpkgArguments: 'zlib openssl'
+
+    - name: git clone RabbitCommon
+      working-directory: ${{env.SOURCE_DIR}}
+      run: git clone https://github.com/KangLin/RabbitCommon.git
+
+    - name: Cache Qt
+      id: cache-qt
+      uses: actions/cache@v1  # not v2!
+      with:
+        path: ${{env.TOOSL_DIR}}/qt
+        key: qftpserver_msvc_qt-vc${{matrix.VCPKG_PLATFORM_TOOLSET}}-${{matrix.triplet}}-qt${{matrix.qt_version}}-${{matrix.BUILD_TYPE}}
+
+    - name: Install Qt
+      # You may pin to the exact commit or the version.
+      # uses: jurplel/install-qt-action@a962fb91949c8e846a3e4a944d50e7ef5cc3a28a
+      uses: jurplel/install-qt-action@v2.14.0
+      with:
+        # Directory to install Qt
+        dir: ${{env.TOOSL_DIR}}/qt # optional
+        # Version of Qt to install
+        version: ${{matrix.qt_version}} # optional, default is 5.15.2
+        # Host platform
+        #host: linux # optional
+        # Target platform for build
+        #target: desktop # optional, default is desktop
+        # Architecture for Windows/Android
+        arch: ${{matrix.qt_arch}} # optional
+        # Whether or not to install Qt dependencies on Linux
+        #install-deps: true # optional, default is true
+        # Additional Qt modules to install
+        modules: ${{env.qt_modules}} # optional
+        # Force a Qt mirror in case the default is not working
+        #mirror: # optional
+        # Whether or not to actually download Qt
+        cached: ${{ steps.cache-qt.outputs.cache-hit }} # optional, default is false
+        # Whether or not to automatically run setup-python to find a valid python version.
+        #setup-python: false # optional, default is true
+        # Qt tools to download--specify comma-separated argument lists which are themselves separated by spaces: <tool_name>,<tool_version>,<tool_arch>
+        #tools: # optional
+        # Whether or not to actually install Qt or just the tools from the tools argument
+        #tools-only: false # optional, default is false
+        # Version of aqtinstall to use in case of issues
+        #aqtversion: # optional, default is ==0.10.0
+        # Version of py7zr to use in case of issues
+        #py7zrversion: # optional, default is ==0.11.0
+        # Any extra arguments to append to the back
+        #extra: # optional
+
+    - name: build log4qt
+      working-directory: ${{env.SOURCE_DIR}}
+      run: |
+        IF NOT EXIST ${{env.INSTALL_DIR}}\lib\cmake\Log4Qt (
+            git clone https://github.com/MEONMedical/Log4Qt.git
+            cd Log4Qt
+            git checkout -b eb4b952a886ab03d24e896e38df015cf0ff5bd7a eb4b952a886ab03d24e896e38df015cf0ff5bd7a
+            cmake -E make_directory build
+            cd build
+            cmake .. ^
+                -A ${{matrix.CMAKE_GENERATOR_PLATFORM}} ^
+                -T ${{matrix.VCPKG_PLATFORM_TOOLSET}} ^
+                -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} ^
+                -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_DIR}} ^
+                -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake
+            cmake --build . --config ${{matrix.BUILD_TYPE}}
+            cmake --build . --config ${{matrix.BUILD_TYPE}} --target install
+        )
+
+    - name: build QFtpServer
+      env:
+        RabbitCommon_DIR: ${{env.SOURCE_DIR}}/RabbitCommon
+      run: |
+        cmake -E make_directory ${{github.workspace}}/build
+        cd ${{github.workspace}}/build
+        cmake ${{github.workspace}} ^
+            -A ${{matrix.CMAKE_GENERATOR_PLATFORM}} ^
+            -T ${{matrix.VCPKG_PLATFORM_TOOLSET}} ^
+            -DCMARK_SHARED=OFF ^
+            -DCMARK_TESTS=OFF ^
+            -DCMARK_STATIC=ON ^
+            -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} ^
+            -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install ^
+            -DBUILD_QUIWidget=OFF ^
+            -DLog4Qt_DIR=${{env.INSTALL_DIR}}/lib/cmake/Log4Qt ^
+            -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake
+        cmake --build . --config ${{matrix.BUILD_TYPE}}
+
+    - name: Package
+      if: ${{ matrix.BUILD_TYPE == 'Release' }}
+      working-directory: ${{github.workspace}}\build
+      run: |
+        cmake --build . --config ${{matrix.BUILD_TYPE}} --target install-runtime
+        move /Y install\plugins\*crypto*.dll install\bin
+        move /Y install\plugins\*ssl*.dll install\bin
+        copy /Y ${{env.INSTALL_DIR}}\bin\*.dll install\bin
+        copy /Y ${{env.INSTALL_DIR}}\lib\*.dll install\bin
+        copy /Y ${{env.RUNVCPKG_VCPKG_ROOT}}\installed\${{env.RUNVCPKG_VCPKG_TRIPLET_OUT}}\bin\*.dll install\bin
+        7z a QFtpServer_windows_${{env.QFtpServer_VERSION}}.zip .\install\*
+        makensis Install.nsi
+        if "5.12.12" == "${{matrix.qt_version}}" (
+            ${{github.workspace}}\build\install\bin\QFtpServerApp.exe ^
+                -f "update_windows.xml" ^
+                --pf QFtpServer_setup_${{env.QFtpServer_VERSION}}.exe ^
+                -m "${{env.QFtpServer_VERSION}}"
+        )
+
+    - name: update 
+      uses: actions/upload-artifact@v2
+      with:
+        name: qftpserver_${{ matrix.os }}_msvc_qt${{matrix.qt_version}}
+        path: |
+          ${{github.workspace}}\build\QFtpServer_setup_${{env.QFtpServer_VERSION}}.exe
+      if: ${{ matrix.BUILD_TYPE == 'Release' }}
+
+    - name: Upload To Github Release
+      if: ${{ matrix.BUILD_TYPE == 'Release' && '5.12.12' == matrix.qt_version && startsWith(github.ref, 'refs/tags/') }}
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        prerelease: true
+        files: |
+          ${{github.workspace}}\build\QFtpServer_windows_${{env.QFtpServer_VERSION}}.zip
+          ${{github.workspace}}\build\QFtpServer_setup_${{env.QFtpServer_VERSION}}.exe
+          ${{github.workspace}}\build\update_windows.xml
