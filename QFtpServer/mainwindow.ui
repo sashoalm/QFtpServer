@@ -15,16 +15,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="4" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEditPassword"/>
-    </item>
-    <item row="5" column="2">
-     <widget class="QToolButton" name="toolButtonBrowse">
-      <property name="text">
-       <string>...</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
@@ -32,24 +22,10 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Password:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="11" column="0" colspan="3">
-     <widget class="QPushButton" name="pushButtonRestartServer">
-      <property name="text">
-       <string>Restart FTP Server</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>Root path:</string>
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="lineEditRootPath">
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -60,13 +36,31 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEditUserName"/>
+    <item row="8" column="0" colspan="3">
+     <widget class="QCheckBox" name="checkBoxOnlyOneIpAllowed">
+      <property name="text">
+       <string>Only one IP allowed</string>
+      </property>
+     </widget>
     </item>
-    <item row="5" column="1">
-     <widget class="QLineEdit" name="lineEditRootPath">
-      <property name="readOnly">
-       <bool>true</bool>
+    <item row="5" column="2">
+     <widget class="QToolButton" name="toolButtonBrowse">
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="13" column="0" colspan="3">
+     <widget class="QPushButton" name="pushButtonShowDebugLog">
+      <property name="text">
+       <string>Debug Console</string>
+      </property>
+     </widget>
+    </item>
+    <item row="14" column="0" colspan="3">
+     <widget class="QPushButton" name="pushButtonExit">
+      <property name="text">
+       <string>Exit</string>
       </property>
      </widget>
     </item>
@@ -77,10 +71,10 @@
       </property>
      </widget>
     </item>
-    <item row="12" column="0" colspan="3">
-     <widget class="QPushButton" name="pushButtonShowDebugLog">
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_3">
       <property name="text">
-       <string>Debug Console</string>
+       <string>Password:</string>
       </property>
      </widget>
     </item>
@@ -91,14 +85,31 @@
       </property>
      </widget>
     </item>
-    <item row="8" column="0" colspan="3">
-     <widget class="QCheckBox" name="checkBoxOnlyOneIpAllowed">
+    <item row="12" column="0" colspan="3">
+     <widget class="QPushButton" name="pushButtonRestartServer">
       <property name="text">
-       <string>Only one IP allowed</string>
+       <string>Restart FTP Server</string>
       </property>
      </widget>
     </item>
-    <item row="10" column="0">
+    <item row="0" column="1" colspan="2">
+     <widget class="QLineEdit" name="lineEditPort">
+      <property name="text">
+       <string>21</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1" colspan="2">
+     <widget class="QLineEdit" name="lineEditPassword"/>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Root path:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0">
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -111,17 +122,22 @@
       </property>
      </spacer>
     </item>
-    <item row="13" column="0" colspan="3">
-     <widget class="QPushButton" name="pushButtonExit">
-      <property name="text">
-       <string>Exit</string>
-      </property>
-     </widget>
+    <item row="3" column="1" colspan="2">
+     <widget class="QLineEdit" name="lineEditUserName"/>
     </item>
-    <item row="0" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEditPort">
+    <item row="10" column="0" colspan="2">
+     <widget class="QCheckBox" name="checkBoxDisableLockScreen">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="text">
-       <string>21</string>
+       <string>Disable lock screen</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
       </property>
      </widget>
     </item>

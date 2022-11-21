@@ -3,10 +3,20 @@
 #include <ftpserver.h>
 #include <QDebug>
 #include <QDateTime>
+#if defined(Q_OS_ANDROID)
+    #include "AndroidUtils.h"
+#endif
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    #include <QRandomGenerator>
+#endif
 
 QChar getRandomChar()
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    return QChar('a' + (QRandomGenerator::securelySeeded().generate()%('z'-'a')));
+#else
     return QChar('a' + (qrand()%('z'-'a')));
+#endif
 }
 
 QString getRandomString(int n)
@@ -21,10 +31,15 @@ QString getRandomString(int n)
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-
+#if defined(Q_OS_ANDROID)
+    CAndroidUtils::InitPermissions();
+#endif
     // Seed the random numbers.
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    QRandomGenerator::securelySeeded().seed(QTime::currentTime().msec());
+#else
     qsrand(QTime::currentTime().msec());
-
+#endif
     const QString &userName = getRandomString(3);
     const QString &password = getRandomString(3);
     const QString &rootPath = QDir::currentPath();
